@@ -1,0 +1,106 @@
+<div class="flex justify-between items-center mb-4">
+  <!-- Button to open dialog -->
+  <button mat-button (click)="openDialog()" class="bg-blue-500 text-white">Add New Employee</button>
+
+  <!-- Search Bar -->
+  <mat-form-field class="search-bar w-3/5">
+    <mat-label>Search</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Search employees">
+  </mat-form-field>
+</div>
+
+<!-- Table to Display Employees -->
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-table">
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+      <td mat-cell *matCellDef="let employee"> {{employee.id}} </td>
+    </ng-container>
+
+    <!-- First Name Column -->
+    <ng-container matColumnDef="firstName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> First Name </th>
+      <td mat-cell *matCellDef="let employee"> {{employee.firstName}} </td>
+    </ng-container>
+
+    <!-- Last Name Column -->
+    <ng-container matColumnDef="lastName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Last Name </th>
+      <td mat-cell *matCellDef="let employee"> {{employee.lastName}} </td>
+    </ng-container>
+
+    <!-- Email Column -->
+    <ng-container matColumnDef="emailId">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+      <td mat-cell *matCellDef="let employee"> {{employee.emailId}} </td>
+    </ng-container>
+
+    <!-- Date of Birth Column -->
+    <ng-container matColumnDef="dateOfBirth">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Date of Birth </th>
+      <td mat-cell *matCellDef="let employee"> {{employee.dateOfBirth | date}} </td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let employee">
+        <button mat-button (click)="onEdit(employee)" class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md mr-2">Edit</button>
+        <button mat-button (click)="onDelete(employee.id!)" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md">Delete</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of employees"></mat-paginator>
+
+  <ng-template #dialogTemplate class="wider-dialog-content">
+    <h2 mat-dialog-title>Add New Employee Data</h2>
+  <mat-dialog-content style="overflow: hidden;"> 
+    <form [formGroup]="selectedEmployeeForm" (ngSubmit)="onSave()">
+      <div class="mb-4">
+        <mat-form-field appearance="fill" class="modal-form-field">
+          <mat-label>First Name</mat-label>
+          <input matInput [(ngModel)]="employee.firstName" name="firstname" required>
+        </mat-form-field>
+      </div>
+      <div class="mb-4">
+        <mat-form-field appearance="fill" class="modal-form-field">
+          <mat-label>Last Name</mat-label>
+          <input matInput [(ngModel)]="employee.lastName" name="lastname" required>
+        </mat-form-field>
+      </div>
+      <div class="mb-4">
+        <mat-form-field appearance="fill" class="modal-form-field">
+          <mat-label>Email</mat-label>
+          <input type="email" matInput [formControl]="email" required>
+          <mat-error *ngIf="email.hasError('email') && !email.hasError('required')">
+            Please enter a valid email address
+          </mat-error>
+          <mat-error *ngIf="email.hasError('required')">
+            Email is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="fill" class="modal-form-field">
+        <mat-label>Date of Birth</mat-label>
+        <input matInput [matDatepicker]="picker" [formControl]="dateOfBirth" required>
+        <mat-hint>MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker touchUi #picker></mat-datepicker>
+        <mat-error *ngIf="dateOfBirth.invalid">
+          Date of birth must be between 01/01/1960 and 01/01/2010
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-button type="submit" (click)="onSaveNew()" mat-dialog-close>Save</button>
+  </mat-dialog-actions>
+  </ng-template>
+  
+</div>

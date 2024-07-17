@@ -1,0 +1,17 @@
+.role-menu-container {
+    padding: 20px;
+  }
+  
+  .role-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .role-menu-title {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #3f51b5;
+  }
+  

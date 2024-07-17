@@ -1,0 +1,23 @@
+<div class="relative w-full">
+  <p-galleria 
+    [value]="images" 
+    (valueChange)="onImagesChange($event)" 
+    [numVisible]="5" 
+    [circular]="true" 
+    [showItemNavigators]="true" 
+    [showThumbnails]="false" 
+    [responsiveOptions]="responsiveOptions" 
+    [containerStyle]="{ 'width': '100%' }"
+    [autoplayInterval]="5000"
+    #galleria>
+    <ng-template pTemplate="item" let-item>
+      <img [src]="item.itemImageSrc" class="w-full h-auto" />
+    </ng-template>
+  </p-galleria>
+  <button class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full" (click)="prev()">
+    &#10094;
+  </button>
+  <button class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full" (click)="next()">
+    &#10095;
+  </button>
+</div>

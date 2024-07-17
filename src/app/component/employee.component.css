@@ -1,0 +1,31 @@
+table {
+    width: 100%;
+  }
+  /* Styling for search bar */
+.search-bar {
+    width: 40%;
+  }
+  
+  /* Styling for modal form fields */
+  .modal-form-field {
+    font-size: 14px;
+    width: calc(100%);
+  }
+  
+  /* Styling for modal dialog */
+.mat-dialog-container {
+  max-width: calc(100% + 30%);
+}
+
+  td, th {
+    width: 18%;
+  }
+  
+  .wider-dialog-content {
+    width: 600px; /* Adjust width as desired */
+  }
+  
+  .wider-dialog-container {
+    width: calc(100% + 15%); /* Increase width by 15% */
+    max-width: unset; /* Remove potential max-width restrictions */
+  }
