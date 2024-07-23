@@ -9,6 +9,7 @@ import { Router, NavigationEnd } from '@angular/router';
 export class AppComponent implements OnInit {
   showHeader: boolean = true;
   title: string = 'employeeApp';
+
   constructor(private router: Router) {}
 
   ngOnInit(): void {

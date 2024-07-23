@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
+import { UserProfile } from '../models/user-profile.model'; // Adjust import based on your actual service location
 
 @Component({
   selector: 'app-profile',
@@ -10,9 +10,8 @@ import { Observable } from 'rxjs';
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
-  username: string = '';
-  email: string = '';
-  role: string = '';
+  userProfile: UserProfile | null = null;
+
   @ViewChild('deleteAccountDialog') deleteAccountDialog!: TemplateRef<any>;
 
   constructor(
@@ -27,14 +26,8 @@ export class ProfileComponent implements OnInit {
 
   loadUserProfile(): void {
     this.authService.getUserProfile().subscribe({
-      next: (user: any) => {
-        this.username = user.username;
-        this.email = user.email;
-        this.role = user.role;
-      },
-      error: (error: any) => {
-        console.error('Error loading user profile', error);
-      }
+      next: (profile: UserProfile) => this.userProfile = profile,
+      error: (error: any) => console.error('Error fetching user profile', error)
     });
   }
 
@@ -43,7 +36,13 @@ export class ProfileComponent implements OnInit {
   }
 
   deleteAccount(): void {
-    this.authService.deleteAccount();
-    this.router.navigate(['/login']);
+    this.authService.deleteAccount().subscribe({
+      next: () => {
+        this.router.navigate(['/login']); // Redirect to login page after successful deletion
+      },
+      error: (error: any) => {
+        console.error('Error deleting account', error);
+      }
+    });
   }
 }

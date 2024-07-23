@@ -1,28 +1,30 @@
 <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-  <h1 class="text-3xl font-bold mb-8 flex items-center">
-    <span>User Profile</span>
-    <img src="images/icons/account.svg" alt="Account" class="h-6 ml-2">
-  </h1>
+  <h1 class="text-3xl font-bold mb-8">User Profile</h1>
   
-  <mat-card appearance="outlined" class="w-full max-w-md">
-    <mat-card-header>
-      <mat-card-title>Username: {{ username }}</mat-card-title>
-      <mat-card-subtitle>Role: {{ role }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p>Email: {{ email }}</p>
-    </mat-card-content>
-    <mat-card-actions align="end">
-      <button mat-button (click)="openDeleteAccountDialog()">Hapus Akun</button>
-    </mat-card-actions>
-  </mat-card>
+  <div *ngIf="userProfile; else loading" class="bg-white rounded-lg shadow-md max-w-md w-full p-6">
+    <div class="mb-4">
+      <p class="text-lg">Username: <span class="font-normal">{{ userProfile.username }}</span></p>
+      <p class="text-lg">Role: <span class="font-normal">{{ userProfile.role }}</span></p>
+    </div>
+    <div class="mb-4">
+      <p class="text-lg">Email: <span class="font-normal">{{ userProfile.email }}</span></p>
+    </div>
+    <div class="flex justify-end">
+      <button class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" (click)="openDeleteAccountDialog()">Hapus Akun</button>
+    </div>
+  </div>
+  
+  <ng-template #loading>
+    <p>Loading profile...</p>
+  </ng-template>
 </div>
 
+<!-- Dialog for account deletion confirmation -->
 <ng-template #deleteAccountDialog>
   <h2 mat-dialog-title>Delete Account Confirmation</h2>
   <mat-dialog-content>Apakah Anda yakin ingin menghapus akun ini?</mat-dialog-content>
   <mat-dialog-actions>
     <button mat-button mat-dialog-close>Batal</button>
-    <button mat-button mat-dialog-close color="warn" (click)="deleteAccount()">Yakin</button>
+    <button mat-button color="warn" (click)="deleteAccount()">Yakin</button>
   </mat-dialog-actions>
 </ng-template>

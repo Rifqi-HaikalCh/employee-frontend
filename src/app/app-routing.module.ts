@@ -14,8 +14,18 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-  { path: 'employee-list', component: EmployeeComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SUPER_ADMIN', 'STAFF_ADMIN'] } },
-  { path: 'role-menu', component: RoleMenuComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SUPER_ADMIN', 'CONTROL_ADMIN'] } },
+  { 
+    path: 'employee-list', 
+    component: EmployeeComponent, 
+    canActivate: [AuthGuard, RoleGuard], 
+    data: { roles: ['SUPER_ADMIN', 'STAFF_ADMIN'] } 
+  },
+  { 
+    path: 'role-menu', 
+    component: RoleMenuComponent, 
+    canActivate: [AuthGuard, RoleGuard], 
+    data: { roles: ['SUPER_ADMIN', 'CONTROL_ADMIN'] } 
+  },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 

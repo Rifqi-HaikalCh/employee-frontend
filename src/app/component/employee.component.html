@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center mb-4">
   <!-- Button to open dialog -->
-  <button mat-button (click)="openDialog()" class="bg-blue-500 text-white">Add New Employee</button>
+  <button mat-button (click)="onAdd()" class="bg-blue-500 text-white">Add New Employee</button>
 
   <!-- Search Bar -->
   <mat-form-field class="search-bar w-3/5">
@@ -57,50 +57,77 @@
 
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of employees"></mat-paginator>
 
-  <ng-template #dialogTemplate class="wider-dialog-content">
-    <h2 mat-dialog-title>Add New Employee Data</h2>
-  <mat-dialog-content style="overflow: hidden;"> 
-    <form [formGroup]="selectedEmployeeForm" (ngSubmit)="onSave()">
-      <div class="mb-4">
-        <mat-form-field appearance="fill" class="modal-form-field">
-          <mat-label>First Name</mat-label>
-          <input matInput [(ngModel)]="employee.firstName" name="firstname" required>
-        </mat-form-field>
-      </div>
-      <div class="mb-4">
-        <mat-form-field appearance="fill" class="modal-form-field">
-          <mat-label>Last Name</mat-label>
-          <input matInput [(ngModel)]="employee.lastName" name="lastname" required>
-        </mat-form-field>
-      </div>
-      <div class="mb-4">
-        <mat-form-field appearance="fill" class="modal-form-field">
-          <mat-label>Email</mat-label>
-          <input type="email" matInput [formControl]="email" required>
-          <mat-error *ngIf="email.hasError('email') && !email.hasError('required')">
-            Please enter a valid email address
-          </mat-error>
-          <mat-error *ngIf="email.hasError('required')">
-            Email is <strong>required</strong>
-          </mat-error>
-        </mat-form-field>
-      </div>
-      <mat-form-field appearance="fill" class="modal-form-field">
-        <mat-label>Date of Birth</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="dateOfBirth" required>
-        <mat-hint>MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker touchUi #picker></mat-datepicker>
-        <mat-error *ngIf="dateOfBirth.invalid">
-          Date of birth must be between 01/01/1960 and 01/01/2010
-        </mat-error>
-      </mat-form-field>
-    </form>
-  </mat-dialog-content>
-  <mat-dialog-actions>
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button type="submit" (click)="onSaveNew()" mat-dialog-close>Save</button>
-  </mat-dialog-actions>
+  <ng-template #dialogTemplate>
+    <h2 mat-dialog-title>{{isNew ? 'Add New Employee Data' : 'Edit Employee Data'}}</h2>
+    <mat-dialog-content style="overflow: hidden;">
+      <form [formGroup]="selectedEmployeeForm" (ngSubmit)="onSave()">
+        <div class="mb-4">
+          <mat-form-field appearance="fill" class="modal-form-field">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" required>
+            <mat-error *ngIf="selectedEmployeeForm.get('firstName')?.hasError('required')">
+              First Name is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="mb-4">
+          <mat-form-field appearance="fill" class="modal-form-field">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" required>
+            <mat-error *ngIf="selectedEmployeeForm.get('lastName')?.hasError('required')">
+              Last Name is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="mb-4">
+          <mat-form-field appearance="fill" class="modal-form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" required>
+            <mat-error *ngIf="selectedEmployeeForm.get('email')?.hasError('required')">
+              Email is <strong>required</strong>
+            </mat-error>
+            <mat-error *ngIf="selectedEmployeeForm.get('email')?.hasError('email')">
+              Email is <strong>invalid</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="mb-4">
+          <mat-form-field appearance="fill" class="modal-form-field">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput formControlName="dateOfBirth" [matDatepicker]="picker" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="selectedEmployeeForm.get('dateOfBirth')?.hasError('required')">
+              Date of Birth is <strong>required</strong>
+            </mat-error>
+            <mat-error *ngIf="selectedEmployeeForm.get('dateOfBirth')?.hasError('dateInvalid')">
+              Date of Birth must be between 10 and 60 years ago
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex justify-end">
+          <button mat-button type="button" (click)="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-md mr-2">Cancel</button>
+          <button mat-button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md">{{isNew ? 'Save' : 'Update'}}</button>
+        </div>
+      </form>
+    </mat-dialog-content>
   </ng-template>
-  
 </div>
+
+<!-- Toast Notifications -->
+<div *ngIf="showToast" class="fixed bottom-0 right-0 bg-green-500 text-white py-2 px-4 rounded mt-4 z-50">
+  {{toastMessage}}
+</div>
+<div *ngIf="showDeleteToast" class="fixed bottom-0 right-0 bg-red-500 text-white py-2 px-4 rounded mt-4 z-50">
+  {{deleteToastMessage}}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteDialogTemplate>
+  <h2 mat-dialog-title>Confirm Delete</h2>
+  <mat-dialog-content>Are you sure you want to delete this employee?</mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button (click)="cancelDelete()" class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-md">Cancel</button>
+    <button mat-button (click)="confirmDelete()" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md">Delete</button>
+  </mat-dialog-actions>
+</ng-template>

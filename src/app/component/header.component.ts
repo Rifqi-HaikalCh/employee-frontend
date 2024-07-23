@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { AccessService } from '../services/access.service';
 
 @Component({
   selector: 'app-header',
@@ -9,60 +10,113 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
-  logoUrl = 'images/logo/fifgroup.png'; // Set local logo URL
+  private rolesAllowedForEmployeeList = ['SUPER_ADMIN', 'STAFF_ADMIN'];
+  private rolesAllowedForRoleMenu = ['SUPER_ADMIN', 'CONTROL_ADMIN'];
+  logoUrl = 'images/logo/fifgroup.png';
   isSidebarOpen = false;
-  @ViewChild('logoutDialog') logoutDialog!: TemplateRef<any>; // Deklarasi ViewChild untuk logoutDialog
+  @ViewChild('logoutDialog') logoutDialog!: TemplateRef<any>;
+  username: string = '';
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private dialog: MatDialog,
+    private accessService: AccessService
   ) {}
 
   ngOnInit(): void {
-    // URL logo sudah diatur secara lokal, tidak perlu panggilan ke backend
+    if (this.authService.isAuthenticated()) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.username = user.username || 'Guest'; // Default to 'Guest' if username is not available
+      this.fetchUserAccess();
+    } else {
+      console.error('User is not authenticated');
+      this.router.navigate(['/login']);
+    }
   }
 
-  get username(): string {
-    return this.authService.getUsername();
+  fetchUserAccess(): void {
+    const userId: string | null = this.authService.getUserId();
+    
+    if (userId) {
+      console.log('Retrieved userId:', userId); // Log userId for debugging
+      const numericUserId = parseInt(userId, 10);
+      
+      if (!isNaN(numericUserId)) {
+        console.log('Numeric userId:', numericUserId); // Log numericUserId for debugging
+        
+        this.accessService.getUserAccess(numericUserId).subscribe(
+          (accessMap) => {
+            // Convert Map to Object
+            const accessObj = Array.from(accessMap.entries()).reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+            }, {} as { [key: string]: boolean });
+            localStorage.setItem('userAccess', JSON.stringify(accessObj));
+          },
+          (error) => {
+            console.error('Failed to fetch user access map', error);
+          }
+        );
+      } else {
+        console.error('Invalid numericUserId:', numericUserId);
+      }
+    } else {
+      console.error('User ID is not available');
+    }
   }
 
   canAccess(page: string): boolean {
-    const role = this.authService.getRole();
-    const rolePermissions: { [key: string]: string[] } = {
-      user: ['dashboard', 'profile'],
-      superAdmin: ['dashboard', 'profile', 'employeeList', 'roleMenu'],
-      staffAdmin: ['dashboard', 'profile', 'employeeList'],
-      controlAdmin: ['dashboard', 'profile', 'roleMenu']
-    };
-    return rolePermissions[role]?.includes(page) || false;
+    const accessMapStr = localStorage.getItem('userAccess');
+    if (!accessMapStr) return false;
+    const accessMap: { [key: string]: boolean } = JSON.parse(accessMapStr);
+    return accessMap[page] || false;
+  }
+  
+  openLogoutDialog(): void {
+    this.dialog.open(this.logoutDialog);
+  }
+
+  confirmLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+    this.dialog.closeAll();
   }
 
   navigateToProfile(): void {
     this.router.navigate(['/profile']);
   }
 
-  toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
+toggleSidebar(): void {
+  this.isSidebarOpen = !this.isSidebarOpen;
+}
 
-  navigateToEmployeeList(): void {
-    this.router.navigate(['/employees']);
+navigateToEmployeeList() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || ''; // Optional chaining untuk menghindari error jika user atau role tidak ada
+
+  if (this.isUserAuthorized(userRole, this.rolesAllowedForEmployeeList)) {
+    this.router.navigate(['/employee-list']);
     this.toggleSidebar();
+  } else {
+    console.error('Access denied to Employee List');
   }
+}
 
-  navigateToRoleMenu(): void {
-    this.router.navigate(['/roles']);
+navigateToRoleMenu() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = user?.role || '';
+
+  if (this.isUserAuthorized(userRole, this.rolesAllowedForRoleMenu)) {
+    this.router.navigate(['/role-menu']);
     this.toggleSidebar();
+  } else {
+    console.error('Access denied to Role Menu');
   }
+}
 
-  openLogoutDialog(): void {
-    this.dialog.open(this.logoutDialog);
-  }
+private isUserAuthorized(userRole: string, allowedRoles: string[]): boolean {
+  return allowedRoles.includes(userRole);
+}
 
-  confirmLogout(): void {
-    this.authService.logout(); // Lakukan logout
-    this.router.navigate(['/login']); // Navigasi ke halaman login setelah logout
-    this.dialog.closeAll(); // Tutup semua dialog setelah logout
-  }
 }

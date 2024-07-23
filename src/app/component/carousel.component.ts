@@ -1,6 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { PhotoService } from '../services/photo.service';
-import { Galleria } from './interface/galleria.interface';
 
 @Component({
   selector: 'app-carousel',
@@ -8,8 +7,8 @@ import { Galleria } from './interface/galleria.interface';
   styleUrls: ['./carousel.component.css'],
   providers: [PhotoService]
 })
-export class CarouselComponent implements OnInit {
-  @ViewChild('galleria') galleria!: Galleria;
+export class CarouselComponent implements OnInit, AfterViewInit {
+  @ViewChild('galleria', { static: false }) galleria!: ElementRef;
 
   images: any[] = [];
 
@@ -36,19 +35,35 @@ export class CarouselComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    this.startAutoplay();
+  }
+
   onImagesChange(event: any) {
     this.images = event;
   }
 
   prev() {
-    if (this.galleria) {
-      this.galleria.prev(); // Menggunakan definisi lokal Galleria
+    if (this.galleria && this.galleria.nativeElement) {
+      const element = this.galleria.nativeElement.querySelector('.p-galleria-prev');
+      if (element) {
+        element.click();
+      }
     }
   }
 
   next() {
-    if (this.galleria) {
-      this.galleria.next(); // Menggunakan definisi lokal Galleria
+    if (this.galleria && this.galleria.nativeElement) {
+      const element = this.galleria.nativeElement.querySelector('.p-galleria-next');
+      if (element) {
+        element.click();
+      }
     }
+  }
+
+  startAutoplay() {
+    setInterval(() => {
+      this.next();
+    }, 5000);
   }
 }

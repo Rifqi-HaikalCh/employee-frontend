@@ -38,6 +38,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { GalleriaModule } from 'primeng/galleria';
 import { ButtonModule } from 'primeng/button';
 import { PhotoService } from './services/photo.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth.Interceptor';
+import { AccessService } from './services/access.service';
 
 
 @NgModule({
@@ -81,7 +84,9 @@ import { PhotoService } from './services/photo.service';
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [PhotoService, AuthService, AuthGuard, provideAnimationsAsync()],
+  providers: [PhotoService, AuthService, AuthGuard, AccessService, provideAnimationsAsync(), 
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA] 
 })

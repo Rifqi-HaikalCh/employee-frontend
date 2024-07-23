@@ -40,7 +40,9 @@
     <a routerLink="/dashboard" class="hover:text-blue-500 flex items-center space-x-2">
       <button mat-button>Home</button>
     </a>
+    <!-- Button Employee List Management -->
     <button *ngIf="canAccess('employeeList')" mat-button (click)="navigateToEmployeeList()">Employee List Management</button>
+    <!-- Button Role Menu Function -->
     <button *ngIf="canAccess('roleMenu')" mat-button (click)="navigateToRoleMenu()">Role Menu Function</button>
   </div>
 </div>

@@ -4,9 +4,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Employee } from '../models/employee.model';
 import { EmployeeService } from '../services/employee.service';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { FormControl, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-employee',
@@ -14,16 +14,13 @@ import { FormControl, Validators } from '@angular/forms';
   styleUrls: ['./employee.component.css']
 })
 export class EmployeeComponent implements OnInit {
-
   selectedEmployeeForm: FormGroup = new FormGroup({
-  firstName: new FormControl('', Validators.required),
-  lastName: new FormControl('', Validators.required),
-  email: new FormControl('', [Validators.required, Validators.email]),
-  dateOfBirth: new FormControl('', [Validators.required, this.dateValidator]),
+    firstName: new FormControl('', Validators.required),
+    lastName: new FormControl('', Validators.required),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    dateOfBirth: new FormControl('', [Validators.required, this.dateValidator]),
   });
 
-  email = new FormControl('', [Validators.required, Validators.email]);
-  dateOfBirth = new FormControl('', [Validators.required, this.dateValidator]);
   employee: any = {};
   employees: Employee[] = [];
   selectedEmployee: Employee = new Employee();
@@ -37,24 +34,51 @@ export class EmployeeComponent implements OnInit {
   showToast: boolean = false;
   deleteToastMessage: string = '';
   showDeleteToast: boolean = false;
+  canEdit: boolean = false;
+  canDelete: boolean = false;
+  canAdd: boolean = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
 
-  constructor(private employeeService: EmployeeService, private dialog: MatDialog) {}
+  constructor(
+    private employeeService: EmployeeService,
+    private dialog: MatDialog,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadEmployees();
+    this.checkUserAccess();
+  }
+
+  checkUserAccess(): void {
+    // Fetch user access from AuthService
+    this.authService.fetchUserAccess().subscribe(
+      accessMap => {
+        this.canEdit = accessMap.get('canEditEmployee') || false;
+        this.canDelete = accessMap.get('canDeleteEmployee') || false;
+        this.canAdd = accessMap.get('canAddEmployee') || false;
+      },
+      error => {
+        console.error('Failed to fetch user access:', error);
+      }
+    );
   }
 
   loadEmployees(): void {
-    this.employeeService.getAllEmployees().subscribe((data: Employee[]) => {
-      this.employees = data;
-      this.dataSource = new MatTableDataSource(this.employees);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    });
+    this.employeeService.getAllEmployees().subscribe(
+      (data: Employee[]) => {
+        this.employees = data;
+        this.dataSource = new MatTableDataSource(this.employees);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      },
+      error => {
+        console.error('Failed to load employees:', error);
+      }
+    );
   }
 
   applyFilter(event: Event) {
@@ -67,20 +91,29 @@ export class EmployeeComponent implements OnInit {
   }
 
   onAdd(): void {
+    if (!this.canAdd) {
+      this.showToastMessage('Anda tidak memiliki akses untuk menambah data.');
+      return;
+    }
     this.isNew = true;
     this.selectedEmployee = new Employee();
+    this.selectedEmployeeForm.reset();
     this.showModal = true;
   }
 
   onEdit(employee: Employee): void {
+    if (!this.canEdit) {
+      this.showToastMessage('Anda tidak memiliki akses untuk mengedit data.');
+      return;
+    }
     this.isNew = false;
     this.selectedEmployee = { ...employee };
+    this.selectedEmployeeForm.patchValue(this.selectedEmployee);
     this.showModal = true;
   }
 
   onSave(): void {
     if (this.selectedEmployeeForm.invalid) {
-      // Form is invalid, prevent submission
       return;
     }
 
@@ -92,33 +125,55 @@ export class EmployeeComponent implements OnInit {
   }
 
   onSaveNew(): void {
-    this.employeeService.saveEmployee(this.selectedEmployee).subscribe(() => {
-      this.loadEmployees();
-      this.closeModal();
-      this.showToastMessage('Data telah ditambah');
-    });
+    this.employeeService.createEmployee(this.selectedEmployee).subscribe(
+      () => {
+        this.loadEmployees();
+        this.closeModal();
+        this.showToastMessage('Data telah ditambah');
+      },
+      error => {
+        console.error('Failed to add employee:', error);
+        this.showToastMessage('Gagal menambah data');
+      }
+    );
   }
 
   onSaveUpdate(): void {
-    this.employeeService.updateEmployee(this.selectedEmployee.id!, this.selectedEmployee).subscribe(() => {
-      this.loadEmployees();
-      this.closeModal();
-      this.showToastMessage('Data telah diupdate');
-    });
+    this.employeeService.updateEmployee(this.selectedEmployee.id!, this.selectedEmployee).subscribe(
+      () => {
+        this.loadEmployees();
+        this.closeModal();
+        this.showToastMessage('Data telah diupdate');
+      },
+      error => {
+        console.error('Failed to update employee:', error);
+        this.showToastMessage('Gagal memperbarui data');
+      }
+    );
   }
 
   onDelete(id: number): void {
+    if (!this.canDelete) {
+      this.showToastMessage('Anda tidak memiliki akses untuk menghapus data.');
+      return;
+    }
     this.employeeToDeleteId = id;
     this.showDeleteModal = true;
   }
 
   confirmDelete(): void {
     if (this.employeeToDeleteId !== null) {
-      this.employeeService.deleteEmployee(this.employeeToDeleteId).subscribe(() => {
-        this.loadEmployees();
-        this.cancelDelete();
-        this.showDeleteToastMessage('Data telah dihapus');
-      });
+      this.employeeService.deleteEmployee(this.employeeToDeleteId).subscribe(
+        () => {
+          this.loadEmployees();
+          this.cancelDelete();
+          this.showDeleteToastMessage('Data telah dihapus');
+        },
+        error => {
+          console.error('Failed to delete employee:', error);
+          this.showDeleteToastMessage('Gagal menghapus data');
+        }
+      );
     }
   }
 
@@ -148,8 +203,8 @@ export class EmployeeComponent implements OnInit {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(this.dialogTemplate, {
-      width: '700px' // Set the desired width here
+    this.dialog.open(this.dialogTemplate, {
+      width: '700px'
     });
   }
 

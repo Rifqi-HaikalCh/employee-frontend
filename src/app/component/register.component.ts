@@ -43,17 +43,27 @@ export class RegisterComponent {
 
     const { username } = this.firstFormGroup.value;
     const { email } = this.secondFormGroup.value;
-    const { password } = this.thirdFormGroup.value;
+    const { password, confirmPassword } = this.thirdFormGroup.value;
 
-    this.authService.register({ username, email, password }).subscribe(response => {
-      this.snackBar.open('Registration successful!', 'Close', {
-        duration: 3000,
-      });
-      this.router.navigate(['/login']);
-    }, error => {
-      this.snackBar.open('Register error: ' + error.error.message, 'Close', {
-        duration: 3000,
-      });
-    });
+    this.authService.register(username, email, password, confirmPassword).subscribe(
+      response => {
+        if (response) { // Expect response to be a boolean or handle as per the actual response
+          this.snackBar.open('Registration successful!', 'Close', {
+            duration: 3000,
+          });
+          this.router.navigate(['/login']);
+        } else {
+          this.snackBar.open('Registration failed. Try again.', 'Close', {
+            duration: 3000,
+          });
+        }
+      },
+      error => {
+        const errorMessage = error.error && error.error.message ? error.error.message : 'An unexpected error occurred';
+        this.snackBar.open('Register error: ' + errorMessage, 'Close', {
+          duration: 3000,
+        });
+      }
+    );
   }
 }

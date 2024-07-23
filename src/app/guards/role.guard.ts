@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -8,15 +8,20 @@ import { AuthService } from '../services/auth.service';
 export class RoleGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    const expectedRoles = route.data['roles']; // Mengakses 'roles' menggunakan notasi indeks
-    const userRole = localStorage.getItem('userRole'); // Asumsikan role disimpan di localStorage
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): boolean {
+    const roles = route.data['roles'] as Array<string>;
+    const userRole = this.authService.getUserRole(); // Use getUserRole() to get the user's role
 
-    if (expectedRoles.includes(userRole)) {
+    // Handle case where userRole might be null
+    if (userRole && roles.includes(userRole)) {
       return true;
-    } else {
-      this.router.navigate(['/dashboard']);
-      return false;
     }
+
+    // Redirect to a default page if access is denied
+    this.router.navigate(['/']);
+    return false;
   }
 }

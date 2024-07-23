@@ -2,22 +2,8 @@ import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { RoleService, UserElement, UserRole } from '../services/role.service';
 import { AuthService } from '../services/auth.service';
-
-export interface UserRole {
-  user: boolean;
-  superAdmin: boolean;
-  staffAdmin: boolean;
-  controlAdmin: boolean;
-}
-
-export interface UserElement {
-  id: number;
-  username: string;
-  roles: UserRole;
-}
 
 export interface RoleDetail {
   role: string;
@@ -33,11 +19,11 @@ export class RoleMenuComponent implements OnInit {
   @ViewChild('confirmationDialog', { static: true }) confirmationDialog!: TemplateRef<any>;
   @ViewChild('detailRoleDialog', { static: true }) detailRoleDialog!: TemplateRef<any>;
 
-  displayedColumns: string[] = ['id', 'username', 'user', 'super-admin', 'staff-admin', 'control-admin'];
+  displayedColumns: string[] = ['id', 'username', 'user', 'superAdmin', 'staffAdmin', 'controlAdmin'];
   dataSource = new MatTableDataSource<UserElement>([]);
   selection = new SelectionModel<UserElement>(true, []);
 
-  detailRoleDisplayedColumns: string[] = ['role', 'employeeList', 'roleMenuFunction'];
+  detailRoleDisplayedColumns: string[] = ['role', 'features'];
   detailRoleDataSource = new MatTableDataSource<RoleDetail>([
     { role: 'Super Admin', features: ['employeeList', 'roleMenuFunction'] },
     { role: 'Staff Admin', features: ['employeeList'] },
@@ -45,14 +31,27 @@ export class RoleMenuComponent implements OnInit {
     { role: 'User', features: [] }
   ]);
 
-  constructor(private dialog: MatDialog, private http: HttpClient, private authService: AuthService) {}
+  canEditRoles: boolean = false;
+
+  constructor(
+    private dialog: MatDialog,
+    private roleService: RoleService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.loadUserData();
+    this.checkUserAccess();
+  }
+
+  checkUserAccess(): void {
+    this.authService.fetchUserAccess().subscribe(accessMap => {
+      this.canEditRoles = accessMap.get('canEditRoles') || false;
+    });
   }
 
   loadUserData() {
-    this.getUserData().subscribe(
+    this.roleService.getAllUsers().subscribe(
       (data: UserElement[]) => {
         this.dataSource.data = data;
       },
@@ -62,12 +61,11 @@ export class RoleMenuComponent implements OnInit {
     );
   }
 
-  getUserData(): Observable<UserElement[]> {
-    const url = 'http://localhost:8081/api/v1/roles'; // Adjusted URL to match endpoint for fetching user data
-    return this.http.get<UserElement[]>(url);
-  }
-
   onRoleSelectionChange(row: UserElement, role: keyof UserRole) {
+    if (!this.canEditRoles) {
+      console.error('You are not authorized to change roles.');
+      return;
+    }
     if (role === 'user') {
       if (row.roles.user) {
         // User role cannot be removed
@@ -85,21 +83,28 @@ export class RoleMenuComponent implements OnInit {
   }
 
   confirmRoleChange(row: UserElement, role: keyof UserRole) {
+    // Reset all roles
     Object.keys(row.roles).forEach(key => row.roles[key as keyof UserRole] = false);
+    // Set the new role
     row.roles[role] = true;
+    // Update the checkbox states
     this.updateCheckboxStates(row);
+    // Update the user role
     this.updateUserRole(row);
   }
 
   updateCheckboxStates(row: UserElement) {
+    // Ensure at least one role is active
     const hasActiveRole = Object.values(row.roles).some(value => value);
     if (!hasActiveRole) {
+      // Default to user role if no active roles
       Object.keys(row.roles).forEach(key => row.roles[key as keyof UserRole] = false);
+      row.roles['user'] = true; // Ensure 'user' role is active
     }
   }
 
   isRoleSelected(row: UserElement, role: keyof UserRole): boolean {
-    return !row.roles[role] && Object.values(row.roles).some(value => value);
+    return row.roles[role] || Object.values(row.roles).some(value => value);
   }
 
   openDetailRoleDialog() {
@@ -107,41 +112,61 @@ export class RoleMenuComponent implements OnInit {
   }
 
   updateUserRole(row: UserElement) {
-    const url = `http://localhost:8081/api/v1/roles/${row.id}/role`;
-    this.http.put(url, { role: this.getSelectedRole(row.roles) }).subscribe(
-      () => {
-        console.log('User role updated successfully');
-      },
-      (error) => {
-        console.error('Failed to update user role', error);
-      }
-    );
+    const selectedRole = this.getSelectedRole(row.roles);
+    const roleId = this.getRoleId(selectedRole);
+    if (roleId !== null) {
+      this.roleService.updateUserRole(row.id, roleId).subscribe(
+        () => {
+          console.log('User role updated successfully');
+        },
+        (error) => {
+          console.error('Failed to update user role', error);
+        }
+      );
+    }
   }
 
   getSelectedRole(roles: UserRole): string {
     if (roles.superAdmin) return 'superAdmin';
     if (roles.staffAdmin) return 'staffAdmin';
     if (roles.controlAdmin) return 'controlAdmin';
-    return 'user';
+    return 'user'; // Default role if none are set
+  }
+
+  getRoleId(role: string): number | null {
+    switch (role) {
+      case 'superAdmin':
+        return 1;
+      case 'staffAdmin':
+        return 2;
+      case 'controlAdmin':
+        return 3;
+      case 'user':
+        return 4;
+      default:
+        return null;
+    }
   }
 
   isSuperAdmin(): boolean {
-    return this.authService.getRole() === 'superAdmin';
+    return this.authService.getUserRole() === 'superAdmin';
   }
 
   isStaffAdmin(): boolean {
-    return this.authService.getRole() === 'staffAdmin';
+    return this.authService.getUserRole() === 'staffAdmin';
   }
 
   isControlAdmin(): boolean {
-    return this.authService.getRole() === 'controlAdmin';
+    return this.authService.getUserRole() === 'controlAdmin';
   }
 
   isSuperAdminOrControlAdmin(): boolean {
-    return this.isSuperAdmin() || this.isControlAdmin();
+    const role = this.authService.getUserRole();
+    return role === 'superAdmin' || role === 'controlAdmin';
   }
 
   isSelf(row: UserElement): boolean {
-    return this.authService.getUserId() === row.id.toString();
+    const currentUserId = this.authService.getUserId();
+    return currentUserId === row.id.toString();
   }
 }

@@ -1,79 +1,144 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, tap, map } from 'rxjs/operators';
 import { User } from '../models/user.model';
-import { tap } from 'rxjs/operators';
+import { UserProfile } from '../models/user-profile.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8081';
+  private baseUrl = 'http://localhost:8081/api/v1';
+  private authUrl = 'http://localhost:8081/auth';
   private loggedInUser: User | null = null;
+  private userAccess: Map<string, boolean> = new Map();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.initializeUser();
+  }
+
+  private initializeUser(): void {
+    const user = localStorage.getItem('user');
+    const userAccess = localStorage.getItem('userAccess');
+
+    if (user) {
+      try {
+        this.loggedInUser = JSON.parse(user);
+      } catch (e) {
+        console.error('Error parsing user from localStorage', e);
+        localStorage.removeItem('user');
+      }
+    }
+
+    if (userAccess) {
+      try {
+        this.userAccess = new Map<string, boolean>(Object.entries(JSON.parse(userAccess)));
+      } catch (e) {
+        console.error('Error parsing userAccess from localStorage', e);
+        localStorage.removeItem('userAccess');
+      }
+    }
+  }
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
   }
 
-    logout(): void {
+  logout(): void {
     this.loggedInUser = null;
+    this.userAccess.clear();
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userAccess');
   }
 
-  getUsername(): string {
-    return this.loggedInUser ? this.loggedInUser.username : '';
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  getUserRole(): string | null {
+    return this.loggedInUser?.role || null;
+  }
+
+  getUserId(): string | null {
+    return this.loggedInUser?.id || null;
+  }
+
+  getUserAccess(): Map<string, boolean> {
+    return this.userAccess;
+  }
+
+  fetchUserAccess(): Observable<Map<string, boolean>> {
+    const userId = this.getUserId();
+    if (!userId) {
+      return of(new Map<string, boolean>());
+    }
+    return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
+      map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
+      tap(accessMap => {
+        this.userAccess = accessMap;
+        localStorage.setItem('userAccess', JSON.stringify(Object.fromEntries(accessMap)));
+      }),
+      catchError(this.handleError)
+    );
   }
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/auth/authenticate`, { username, password }).pipe(
+    return this.http.post<any>(`${this.authUrl}/authenticate`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('token', response.token); // Simpan token di localStorage
-      })
+        localStorage.setItem('token', response.token);
+        this.loggedInUser = response.user;
+        localStorage.setItem('user', JSON.stringify(response.user));
+
+        // Storing access data
+        localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
+      }),
+      catchError(this.handleError)
     );
   }
 
-  register(user: { username: string, email: string, password: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/register`, user);
-  }
-
-  getUserProfile(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/api/v1/users/profile`).pipe(
-      tap(user => this.loggedInUser = user)
+  register(username: string, email: string, password: string, confirmation: string): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}/register`, { username, email, password, confirmation }).pipe(
+      catchError(this.handleError)
     );
   }
 
-  updateUserProfile(user: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/api/v1/users/profile`, user).pipe(
-      tap(updatedUser => this.loggedInUser = updatedUser)
+  getUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError)
     );
   }
 
-  deleteAccount(): Observable<any> {
-    if (!this.loggedInUser) {
-      throw new Error('User is not logged in'); // Atau lakukan penanganan sesuai kebutuhan
+  updateUserProfile(user: User): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/users/profile`, user, { headers: this.getAuthHeaders() }).pipe(
+      tap(updatedUser => {
+        this.loggedInUser = updatedUser;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  deleteAccount(): Observable<void> {
+    const userId = this.getUserId();
+    if (!userId) {
+      return throwError(() => new Error('User is not logged in'));
     }
-    
-    const userId = this.loggedInUser.id; // Mengambil ID user yang sedang login
-    const url = `${this.baseUrl}/users/${userId}`; // Sesuaikan dengan endpoint backend Anda
-    return this.http.delete(url).pipe(
+    return this.http.delete<void>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
       tap(() => {
-        this.logout(); // Logout pengguna setelah berhasil menghapus akun
-      })
+        this.logout();
+      }),
+      catchError(this.handleError)
     );
-  
   }
 
-  getEmail(): string {
-    return this.loggedInUser ? this.loggedInUser.email : '';
-  }
-
-  getRole(): string {
-    return this.loggedInUser ? this.loggedInUser.role : '';
-  }
-
-  getUserId(): string {
-    return this.loggedInUser ? this.loggedInUser.id : '';
+  private handleError(error: any): Observable<never> {
+    console.error('An error occurred', error);
+    return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 }
