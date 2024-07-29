@@ -5,17 +5,17 @@
     </div>
     <div class="w-full lg:w-1/2">
       <h2 class="text-2xl font-bold mb-4 text-center">Login</h2>
-      <form (ngSubmit)="login()">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="mb-4">
           <mat-form-field appearance="fill" class="w-full">
             <mat-label>Username</mat-label>
-            <input matInput [(ngModel)]="username" name="username" required>
+            <input matInput formControlName="username" required>
           </mat-form-field>
         </div>
         <div class="mb-4">
           <mat-form-field appearance="fill" class="w-full">
             <mat-label>Password</mat-label>
-            <input matInput [type]="hide ? 'password' : 'text'" [(ngModel)]="password" name="password" required>
+            <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" required>
             <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
@@ -26,6 +26,7 @@
           <a routerLink="/register" class="text-blue-500 hover:underline">Belum memiliki akun? Registrasi disini</a>
         </div>
       </form>
+      <div *ngIf="errorMessage" class="text-red-500 mt-4 text-center">{{ errorMessage }}</div>
     </div>
   </div>
 </div>

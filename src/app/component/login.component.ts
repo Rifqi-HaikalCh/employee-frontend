@@ -1,51 +1,56 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../services/auth.service';
+import { JwtResponse } from '../models/jwt-response.model';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
-  username: string = '';
-  password: string = '';
-  hide = true;
+export class LoginComponent implements OnInit {
+  loginForm: FormGroup;
+  errorMessage: string = '';
+  hide: boolean = true; // Variable to control password visibility
 
   constructor(
+    private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
-  ) {}
-
-  login(): void {
-    this.authService.login(this.username, this.password).subscribe(response => {
-      if (response.authenticated) {
-        localStorage.setItem('token', response.jwttoken);
-        localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
-        const user = {
-          username: this.username,
-          email: response.email,
-          role: response.role,
-          id: response.userId
-        };
-        localStorage.setItem('user', JSON.stringify(user));
-        console.log(localStorage)
-        this.router.navigate(['/dashboard']);
-        this.snackBar.open('Login successful!', 'Close', {
-          duration: 3000,
-        });
-      } else {
-        this.snackBar.open('Login failed. Please check your credentials.', 'Close', {
-          duration: 3000,
-        });
-      }
-    }, error => {
-      console.error('Login error', error);
-      this.snackBar.open('Login failed. Please check your credentials.', 'Close', {
-        duration: 3000,
-      });
+    private router: Router
+  ) {
+    this.loginForm = this.formBuilder.group({
+      username: ['', [Validators.required]],
+      password: ['', [Validators.required]]
     });
+  }
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  onSubmit(): void {
+    if (this.loginForm.valid) {
+      const { username, password } = this.loginForm.value;
+      this.authService.login(username, password).subscribe({
+        next: (response: JwtResponse) => {
+          if (response.authenticated) {
+            // Save token and user details
+            this.authService.saveToken(response.token);
+            // Optionally, save user details in local storage or a service
+            // Navigate to the dashboard or another page
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.errorMessage = 'Invalid username or password';
+          }
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+          this.errorMessage = 'An error occurred during login. Please try again.';
+        }
+      });
+    }
   }
 }

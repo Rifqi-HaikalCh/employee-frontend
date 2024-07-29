@@ -4,6 +4,7 @@ import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { UserProfile } from '../models/user-profile.model';
+import { JwtResponse } from '../models/jwt-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -88,15 +89,22 @@ export class AuthService {
     );
   }
 
-  login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.authUrl}/authenticate`, { username, password }).pipe(
+  login(username: string, password: string): Observable<JwtResponse> {
+    return this.http.post<JwtResponse>(`${this.authUrl}/authenticate`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('token', response.token);
-        this.loggedInUser = response.user;
-        localStorage.setItem('user', JSON.stringify(response.user));
-
-        // Storing access data
-        localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
+        if (response.authenticated) {
+          localStorage.setItem('token', response.token);
+          this.loggedInUser = {
+            id: '', // Replace with actual data if available in response
+            username: username,
+            email: response.email,
+            role: response.role
+          };
+          localStorage.setItem('user', JSON.stringify(this.loggedInUser));
+          localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
+        } else {
+          this.logout(); // Ensure logout on failed authentication
+        }
       }),
       catchError(this.handleError)
     );
@@ -135,6 +143,10 @@ export class AuthService {
       }),
       catchError(this.handleError)
     );
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
   }
 
   private handleError(error: any): Observable<never> {
