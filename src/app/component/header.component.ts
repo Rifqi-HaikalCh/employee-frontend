@@ -92,27 +92,13 @@ toggleSidebar(): void {
 }
 
 navigateToEmployeeList() {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const userRole = user?.role || ''; // Optional chaining untuk menghindari error jika user atau role tidak ada
-
-  if (this.isUserAuthorized(userRole, this.rolesAllowedForEmployeeList)) {
-    this.router.navigate(['/employee-list']);
-    this.toggleSidebar();
-  } else {
-    console.error('Access denied to Employee List');
-  }
+  this.toggleSidebar();
+  this.router.navigate(['/employee-list']);
 }
 
 navigateToRoleMenu() {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const userRole = user?.role || '';
-
-  if (this.isUserAuthorized(userRole, this.rolesAllowedForRoleMenu)) {
-    this.router.navigate(['/role-menu']);
-    this.toggleSidebar();
-  } else {
-    console.error('Access denied to Role Menu');
-  }
+  this.toggleSidebar();
+  this.router.navigate(['/role-menu']);
 }
 
 private isUserAuthorized(userRole: string, allowedRoles: string[]): boolean {

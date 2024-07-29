@@ -1,121 +1,109 @@
 <div class="role-menu-container">
-    <div class="role-menu-header">
-      <h1 class="role-menu-title">Role Menu Function</h1>
-      <button mat-raised-button color="primary" (click)="openDetailRoleDialog()">View Detail Role</button>
-    </div>
-  
-    <ng-template #confirmationDialog let-data>
-      <h2 mat-dialog-title>Confirm Role Assignment</h2>
-      <mat-dialog-content>Are you sure you want to assign {{data.role}} role to {{data.row.username}}?</mat-dialog-content>
-      <mat-dialog-actions>
-        <button mat-button mat-dialog-close>No</button>
-        <button mat-button (click)="confirmRoleChange(data.row, data.role)" mat-dialog-close>Yes</button>
-      </mat-dialog-actions>
-    </ng-template>
-  
-    <ng-template #detailRoleDialog>
-      <h2 mat-dialog-title>Detail Role</h2>
-      <mat-dialog-content>
-        <table mat-table [dataSource]="detailRoleDataSource" class="mat-elevation-z8">
-          <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef>Role</th>
-            <td mat-cell *matCellDef="let element">{{element.role}}</td>
-          </ng-container>
-          <ng-container matColumnDef="employeeList">
-            <th mat-header-cell *matHeaderCellDef>Employee List</th>
-            <td mat-cell *matCellDef="let element">
-              <mat-checkbox [checked]="element.features.includes('employeeList')" disabled></mat-checkbox>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="roleMenuFunction">
-            <th mat-header-cell *matHeaderCellDef>Role Menu Function</th>
-            <td mat-cell *matCellDef="let element">
-              <mat-checkbox [checked]="element.features.includes('roleMenuFunction')" disabled></mat-checkbox>
-            </td>
-          </ng-container>
-  
-          <tr mat-header-row *matHeaderRowDef="detailRoleDisplayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: detailRoleDisplayedColumns;"></tr>
-        </table>
-      </mat-dialog-content>
-      <mat-dialog-actions>
-        <button mat-button mat-dialog-close>Close</button>
-      </mat-dialog-actions>
-    </ng-template>
-  
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-      <!-- ID Column -->
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef> ID </th>
-        <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-      </ng-container>
-  
-      <!-- Username Column -->
-      <ng-container matColumnDef="username">
-        <th mat-header-cell *matHeaderCellDef> Username </th>
-        <td mat-cell *matCellDef="let element"> {{element.username}} </td>
-      </ng-container>
-  
-      <!-- User Role Column -->
-      <ng-container matColumnDef="user">
-        <th mat-header-cell *matHeaderCellDef> User </th>
-        <td mat-cell *matCellDef="let row">
-          <mat-checkbox (click)="$event.stopPropagation()"
-                        (change)="onRoleSelectionChange(row, 'user')"
-                        [checked]="row.roles.user"
-                        [disabled]="isRoleSelected(row, 'user')"
-                        [aria-label]="'Select ' + row.username + ' as User'">
-          </mat-checkbox>
-        </td>
-      </ng-container>
-  
-      <!-- Super Admin Role Column -->
-      <ng-container matColumnDef="super-admin">
-        <th mat-header-cell *matHeaderCellDef> Super Admin </th>
-        <td mat-cell *matCellDef="let row">
-          <mat-checkbox *ngIf="isSuperAdmin()"
-                        (click)="$event.stopPropagation()"
-                        (change)="onRoleSelectionChange(row, 'superAdmin')"
-                        [checked]="row.roles.superAdmin"
-                        [disabled]="isRoleSelected(row, 'superAdmin')"
-                        [aria-label]="'Select ' + row.username + ' as Super Admin'">
-          </mat-checkbox>
-          <span *ngIf="!isSuperAdmin()">Not Available</span>
-        </td>
-      </ng-container>
-  
-      <!-- Staff Admin Role Column -->
-      <ng-container matColumnDef="staff-admin">
-        <th mat-header-cell *matHeaderCellDef> Staff Admin </th>
-        <td mat-cell *matCellDef="let row">
-          <mat-checkbox *ngIf="isStaffAdmin()"
-                        (click)="$event.stopPropagation()"
-                        (change)="onRoleSelectionChange(row, 'staffAdmin')"
-                        [checked]="row.roles.staffAdmin"
-                        [disabled]="isRoleSelected(row, 'staffAdmin')"
-                        [aria-label]="'Select ' + row.username + ' as Staff Admin'">
-          </mat-checkbox>
-          <span *ngIf="!isStaffAdmin()">Not Available</span>
-        </td>
-      </ng-container>
-  
-      <!-- Control Admin Role Column -->
-      <ng-container matColumnDef="control-admin">
-        <th mat-header-cell *matHeaderCellDef> Control Admin </th>
-        <td mat-cell *matCellDef="let row">
-          <mat-checkbox *ngIf="isControlAdmin()"
-                        (click)="$event.stopPropagation()"
-                        (change)="onRoleSelectionChange(row, 'controlAdmin')"
-                        [checked]="row.roles.controlAdmin"
-                        [disabled]="isRoleSelected(row, 'controlAdmin')"
-                        [aria-label]="'Select ' + row.username + ' as Control Admin'">
-          </mat-checkbox>
-          <span *ngIf="!isControlAdmin()">Not Available</span>
-        </td>
-      </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+  <div class="role-menu-header">
+    <h1 class="role-menu-title">Role Menu Function</h1>
+    <button mat-raised-button color="primary" (click)="openDetailRoleDialog()">View Detail Role</button>
   </div>
-  
+
+  <!-- Confirmation Dialog -->
+  <ng-template #confirmationDialog let-data>
+    <h2 mat-dialog-title>Confirm Role Assignment</h2>
+    <mat-dialog-content>Are you sure you want to assign {{data.role}} role to {{data.row.username}}?</mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button mat-dialog-close>No</button>
+      <button mat-button (click)="confirmRoleChange(data.row, data.role)" mat-dialog-close>Yes</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+  <!-- Detail Role Dialog -->
+  <ng-template #detailRoleDialog>
+    <h2 mat-dialog-title>Detail Role</h2>
+    <mat-dialog-content>
+      <table mat-table [dataSource]="detailRoleDataSource" class="mat-elevation-z8">
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let element">{{element.role}}</td>
+        </ng-container>
+        <ng-container matColumnDef="features">
+          <th mat-header-cell *matHeaderCellDef>Features</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-checkbox *ngFor="let feature of element.features" [checked]="true" disabled>
+              {{feature}}
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="detailRoleDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: detailRoleDisplayedColumns;"></tr>
+      </table>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+  <!-- User Role Table -->
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let element">{{element.id}}</td>
+    </ng-container>
+
+    <!-- Username Column -->
+    <ng-container matColumnDef="username">
+      <th mat-header-cell *matHeaderCellDef>Username</th>
+      <td mat-cell *matCellDef="let element">{{element.username}}</td>
+    </ng-container>
+
+    <!-- User Role Column -->
+    <ng-container matColumnDef="user">
+      <th mat-header-cell *matHeaderCellDef>User</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="onRoleSelectionChange(row, 'user')"
+                      [checked]="row.roles.user"
+                      [aria-label]="'Select ' + row.username + ' as User'">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Super Admin Role Column -->
+    <ng-container matColumnDef="super-admin">
+      <th mat-header-cell *matHeaderCellDef>Super Admin</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="onRoleSelectionChange(row, 'superAdmin')"
+                      [checked]="row.roles.superAdmin"
+                      [aria-label]="'Select ' + row.username + ' as Super Admin'">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Staff Admin Role Column -->
+    <ng-container matColumnDef="staff-admin">
+      <th mat-header-cell *matHeaderCellDef>Staff Admin</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="onRoleSelectionChange(row, 'staffAdmin')"
+                      [checked]="row.roles.staffAdmin"
+                      [aria-label]="'Select ' + row.username + ' as Staff Admin'">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Control Admin Role Column -->
+    <ng-container matColumnDef="control-admin">
+      <th mat-header-cell *matHeaderCellDef>Control Admin</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="onRoleSelectionChange(row, 'controlAdmin')"
+                      [checked]="row.roles.controlAdmin"
+                      [aria-label]="'Select ' + row.username + ' as Control Admin'">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>

@@ -64,6 +64,6 @@ export class CarouselComponent implements OnInit, AfterViewInit {
   startAutoplay() {
     setInterval(() => {
       this.next();
-    }, 5000);
+    }, 3000); // Change to 3000 milliseconds for 3 seconds
   }
 }

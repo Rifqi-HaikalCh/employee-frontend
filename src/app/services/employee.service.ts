@@ -16,37 +16,35 @@ export class EmployeeService {
     private authService: AuthService
   ) {}
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  // Uncomment and use this method if you need to set headers for authentication
+  // private getAuthHeaders(): HttpHeaders {
+  //   const token = localStorage.getItem('token');
+  //   return new HttpHeaders({
+  //     'Authorization': `Bearer ${token}`
+  //   });
+  // }
 
   getAllEmployees(): Observable<Employee[]> {
-    const headers = this.getAuthHeaders();
-    return this.http.get<Employee[]>(`${this.baseUrl}/data`, { headers }).pipe(
+    console.log(this.http.get<Employee[]>(`${this.baseUrl}`))
+    return this.http.get<Employee[]>(`${this.baseUrl}`).pipe(
       catchError(this.handleError)
     );
   }
 
   createEmployee(employee: Employee): Observable<Employee> {
-    const headers = this.getAuthHeaders();
-    return this.http.post<Employee>(`${this.baseUrl}/cont/add`, employee, { headers }).pipe(
+    return this.http.post<Employee>(`${this.baseUrl}`, employee).pipe(
       catchError(this.handleError)
     );
   }
 
   updateEmployee(id: number, employee: Employee): Observable<Employee> {
-    const headers = this.getAuthHeaders();
-    return this.http.put<Employee>(`${this.baseUrl}/cont/${id}`, employee, { headers }).pipe(
+    return this.http.put<Employee>(`${this.baseUrl}/${id}`, employee).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteEmployee(id: number): Observable<void> {
-    const headers = this.getAuthHeaders();
-    return this.http.delete<void>(`${this.baseUrl}/cont/${id}`, { headers }).pipe(
+    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }

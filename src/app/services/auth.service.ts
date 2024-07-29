@@ -5,6 +5,7 @@ import { catchError, tap, map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { UserProfile } from '../models/user-profile.model';
 import { JwtResponse } from '../models/jwt-response.model';
+import { UserRoleDto } from '../models/user-role.dto'; 
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ import { JwtResponse } from '../models/jwt-response.model';
 export class AuthService {
   private baseUrl = 'http://localhost:8081/api/v1';
   private authUrl = 'http://localhost:8081/auth';
+  private roleUrl = 'http://localhost:8081/api/v1/roles';
   private loggedInUser: User | null = null;
   private userAccess: Map<string, boolean> = new Map();
 
@@ -74,6 +76,17 @@ export class AuthService {
     return this.userAccess;
   }
 
+  getAllUsers(): Observable<UserRoleDto[]> {
+    return this.http.get<UserRoleDto[]>(this.roleUrl);
+  }
+  
+  getUserPermissions(): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+    return this.http.get<any>(`${this.baseUrl}/permissions`, { headers });
+  }
+
   fetchUserAccess(): Observable<Map<string, boolean>> {
     const userId = this.getUserId();
     if (!userId) {
@@ -95,7 +108,6 @@ export class AuthService {
         if (response.authenticated) {
           localStorage.setItem('token', response.token);
           this.loggedInUser = {
-            id: '', // Replace with actual data if available in response
             username: username,
             email: response.email,
             role: response.role
@@ -116,12 +128,6 @@ export class AuthService {
     );
   }
 
-  getUserProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
   updateUserProfile(user: User): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/users/profile`, user, { headers: this.getAuthHeaders() }).pipe(
       tap(updatedUser => {
@@ -132,6 +138,12 @@ export class AuthService {
     );
   }
 
+  getUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
   deleteAccount(): Observable<void> {
     const userId = this.getUserId();
     if (!userId) {
@@ -144,7 +156,7 @@ export class AuthService {
       catchError(this.handleError)
     );
   }
-
+  
   saveToken(token: string): void {
     localStorage.setItem('token', token);
   }

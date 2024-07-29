@@ -29,3 +29,36 @@ table {
     width: calc(100% + 15%); /* Increase width by 15% */
     max-width: unset; /* Remove potential max-width restrictions */
   }
+  /* Dialog content styling */
+.mat-dialog-content {
+  padding: 16px;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+/* Container for form fields to ensure consistent spacing */
+.form-field-container {
+  margin-bottom: 16px;
+}
+
+/* Form field styling */
+.form-field {
+  width: 100%;
+}
+
+/* Action buttons styling */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+
+.submit-button:hover {
+  background-color: #bad5f0; /* Darker blue on hover */
+}
+
+/* Styling for mat-error */
+.mat-error {
+  font-size: 12px;
+}

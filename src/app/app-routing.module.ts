@@ -16,15 +16,11 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { 
     path: 'employee-list', 
-    component: EmployeeComponent, 
-    canActivate: [AuthGuard, RoleGuard], 
-    data: { roles: ['SUPER_ADMIN', 'STAFF_ADMIN'] } 
+    component: EmployeeComponent
   },
   { 
     path: 'role-menu', 
-    component: RoleMenuComponent, 
-    canActivate: [AuthGuard, RoleGuard], 
-    data: { roles: ['SUPER_ADMIN', 'CONTROL_ADMIN'] } 
+    component: RoleMenuComponent
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
