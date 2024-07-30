@@ -1,6 +1,6 @@
 // src/app/models/jwt-response.model.ts
 export interface JwtResponse {
-    token: string;
+    jwttoken: string;
     authenticated: boolean;
     email: string;
     role: string;

@@ -1,13 +1,9 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
-import { UserService } from '../services/user.service';
-import { UserRoleDto } from '../models/user-role.dto';
+import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
+import { MatTableDataSource } from "@angular/material/table";
+import { UserRoleDto } from "../services/auth.service";
+import { MatDialog } from "@angular/material/dialog";
+import { UserService } from "../services/user.service";
 
-export interface RoleDetail {
-  role: string;
-  features: string[];
-}
 
 @Component({
   selector: 'app-role-menu',
@@ -22,7 +18,7 @@ export class RoleMenuComponent implements OnInit {
   dataSource = new MatTableDataSource<UserRoleDto>([]);
 
   detailRoleDisplayedColumns: string[] = ['role', 'features'];
-  detailRoleDataSource = new MatTableDataSource<RoleDetail>([
+  detailRoleDataSource = new MatTableDataSource<any>([
     { role: 'Super Admin', features: ['employeeList', 'roleMenuFunction'] },
     { role: 'Staff Admin', features: ['employeeList'] },
     { role: 'Control Admin', features: ['roleMenuFunction'] },
@@ -40,7 +36,8 @@ export class RoleMenuComponent implements OnInit {
 
   loadUserData() {
     this.userService.getAllUsers().subscribe(
-      (data: UserRoleDto[]) => {
+      (data) => {
+        console.log(data);
         this.dataSource.data = data;
       },
       (error) => {
@@ -54,12 +51,17 @@ export class RoleMenuComponent implements OnInit {
   }
 
   onRoleSelectionChange(row: UserRoleDto, role: keyof UserRoleDto['roles']) {
-    if (role === 'user') {
-      if (row.roles.user) {
-        // User role cannot be removed
-        return;
-      }
+    if (role === 'user' && row.roles.user) {
+      // User role cannot be removed
+      return;
     }
+
+    const selectedRoles = Object.values(row.roles).filter(value => value).length;
+    if (selectedRoles > 1) {
+      alert('Only one role can be selected at a time!');
+      return;
+    }
+
     this.dialog.open(this.confirmationDialog, { data: { row, role } });
   }
 
@@ -79,28 +81,26 @@ export class RoleMenuComponent implements OnInit {
     const hasActiveRole = Object.values(row.roles).some(value => value);
     if (!hasActiveRole) {
       // Default to user role if no active roles
-      Object.keys(row.roles).forEach(key => row.roles[key as keyof UserRoleDto['roles']] = false);
       row.roles['user'] = true; // Ensure 'user' role is active
     }
   }
 
   updateUserRole(row: UserRoleDto) {
     const selectedRole = this.getSelectedRole(row.roles);
-    const roleId = this.getRoleId(selectedRole);
-
-    if (roleId) {
-      // Implement your logic to update the user role in the backend
-      console.log('Updating user role', row.id, roleId);
-      this.loadUserData(); // Refresh user data after update
+    if (selectedRole) {
+      this.userService.updateUserRole(row.id, selectedRole).subscribe(
+        (response: any) => {
+          console.log('User role updated successfully', response);
+          this.loadUserData(); // Refresh user data after update
+        },
+        (error: any) => {
+          console.error('Error updating user role', error);
+        }
+      );
     }
   }
 
   getSelectedRole(roles: { [key: string]: boolean }): string {
     return Object.keys(roles).find(role => roles[role]) || 'user';
-  }
-
-  getRoleId(role: string): number | null {
-    // Implement your logic to map role name to role ID
-    return null; // Replace with actual role ID retrieval logic
   }
 }

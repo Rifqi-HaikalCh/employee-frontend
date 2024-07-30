@@ -35,10 +35,10 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       const { username, password } = this.loginForm.value;
       this.authService.login(username, password).subscribe({
-        next: (response: JwtResponse) => {
+        next: (response: any) => {
           if (response.authenticated) {
             // Save token and user details
-            this.authService.saveToken(response.token);
+            this.authService.saveToken(response.jwttoken);
             // Optionally, save user details in local storage or a service
             // Navigate to the dashboard or another page
             this.router.navigate(['/dashboard']);

@@ -34,8 +34,7 @@ export class EmployeeService {
     
   }
 
-
-  createEmployee(employee: Employee): Observable<Employee> {
+  createEmployee(employee: any): Observable<Employee> {
     return this.http.post<Employee>(this.baseUrl, employee, { headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError)
     );

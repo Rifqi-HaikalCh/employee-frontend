@@ -1,11 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
-import { User } from '../models/user.model';
-import { UserProfile } from '../models/user-profile.model';
-import { JwtResponse } from '../models/jwt-response.model';
-import { UserRoleDto } from '../models/user-role.dto'; 
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+
+export interface UserRoleDto {
+  id: number;
+  username: string;
+  roles: {
+    user: boolean;
+    superAdmin: boolean;
+    staffAdmin: boolean;
+    controlAdmin: boolean;
+  };
+}
+
+export interface JwtResponse {
+  authenticated: boolean;
+  token: string;
+  username: string;
+  email: string;
+  role: string;
+  accessMap: { [key: string]: boolean };
+}
+
+export interface UserProfile {
+  username: string;
+  email: string;
+  role: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +36,7 @@ export class AuthService {
   private baseUrl = 'http://localhost:8081/api/v1';
   private authUrl = 'http://localhost:8081/auth';
   private roleUrl = 'http://localhost:8081/api/v1/roles';
-  private loggedInUser: User | any = null;
+  private loggedInUser: UserRoleDto | null = null;
   private userAccess: Map<string, boolean> = new Map();
   private userProfile: UserProfile | null = null;
 
@@ -66,10 +88,24 @@ export class AuthService {
   }
 
   getUserRole(): string | null {
-    return this.loggedInUser?.role || null;
+    if (!this.loggedInUser || !this.loggedInUser.roles) {
+      return null;
+    }
+
+    if (this.loggedInUser.roles.superAdmin) {
+      return 'SUPER_ADMIN';
+    } else if (this.loggedInUser.roles.staffAdmin) {
+      return 'STAFF_ADMIN';
+    } else if (this.loggedInUser.roles.controlAdmin) {
+      return 'CONTROL_ADMIN';
+    } else if (this.loggedInUser.roles.user) {
+      return 'USER';
+    }
+
+    return null;
   }
 
-  getUserId(): string | null {
+  getUserId(): number | null {
     return this.loggedInUser?.id || null;
   }
 
@@ -90,9 +126,14 @@ export class AuthService {
         if (response.authenticated) {
           localStorage.setItem('token', response.token);
           this.loggedInUser = {
+            id: 0, // Temporary until response includes ID
             username: username,
-            email: response.email,
-            role: response.role
+            roles: {
+              user: response.role === 'USER',
+              superAdmin: response.role === 'SUPER_ADMIN',
+              staffAdmin: response.role === 'STAFF_ADMIN',
+              controlAdmin: response.role === 'CONTROL_ADMIN'
+            }
           };
           localStorage.setItem('user', JSON.stringify(this.loggedInUser));
           localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
@@ -121,10 +162,10 @@ export class AuthService {
     );
   }
 
-  updateUserProfile(user: User): Observable<User> {
-    return this.http.put<User>(`${this.baseUrl}/users/profile`, user, { headers: this.getAuthHeaders() }).pipe(
+  updateUserProfile(user: UserRoleDto): Observable<UserRoleDto> {
+    return this.http.put<UserRoleDto>(`${this.baseUrl}/users/profile`, user, { headers: this.getAuthHeaders() }).pipe(
       tap(this.updateLoggedInUser.bind(this)),
-      catchError(this.handleError<User>('updateUserProfile'))
+      catchError(this.handleError<UserRoleDto>('updateUserProfile'))
     );
   }
 
@@ -145,16 +186,30 @@ export class AuthService {
     return this.userProfile;
   }
 
-  private updateLoggedInUser(user: User): void {
+  private updateLoggedInUser(user: UserRoleDto): void {
     if (this.userProfile) {
       this.userProfile.username = user.username;
-      this.userProfile.email = user.email;
-      this.userProfile.role = user.role;
+      // Correctly update email and role from the provided user object
+      this.userProfile.email = 'email@domain.com'; // replace with actual email if needed
+      this.userProfile.role = this.getUserRoleFromRoles(user.roles);
     }
   }
 
+  private getUserRoleFromRoles(roles: { user: boolean; superAdmin: boolean; staffAdmin: boolean; controlAdmin: boolean }): string {
+    if (roles.superAdmin) {
+      return 'SUPER_ADMIN';
+    } else if (roles.staffAdmin) {
+      return 'STAFF_ADMIN';
+    } else if (roles.controlAdmin) {
+      return 'CONTROL_ADMIN';
+    } else if (roles.user) {
+      return 'USER';
+    }
+    return '';
+  }
+
   // Access control endpoints
-  fetchUserAccess(userId: string): Observable<Map<string, boolean>> {
+  fetchUserAccess(userId: number): Observable<Map<string, boolean>> {
     return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
       map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
       tap(this.updateUserAccess.bind(this)),
@@ -180,9 +235,14 @@ export class AuthService {
     if (response.authenticated) {
       localStorage.setItem('token', response.token);
       this.loggedInUser = {
+        id: 0, // Temporary until response includes ID
         username: response.username,
-        email: response.email,
-        role: response.role
+        roles: {
+          user: response.role === 'USER',
+          superAdmin: response.role === 'SUPER_ADMIN',
+          staffAdmin: response.role === 'STAFF_ADMIN',
+          controlAdmin: response.role === 'CONTROL_ADMIN'
+        }
       };
       localStorage.setItem('user', JSON.stringify(this.loggedInUser));
       this.updateUserAccess(new Map(Object.entries(response.accessMap)));
@@ -191,9 +251,9 @@ export class AuthService {
     }
   }
 
-  private updateUserAccess(accessMap: Map<string, boolean>): void {
-    this.userAccess = accessMap;
-    localStorage.setItem('userAccess', JSON.stringify(Object.fromEntries(accessMap)));
+  private updateUserAccess(access: Map<string, boolean>): void {
+    this.userAccess = access;
+    localStorage.setItem('userAccess', JSON.stringify(Array.from(access.entries())));
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

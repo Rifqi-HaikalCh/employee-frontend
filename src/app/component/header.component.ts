@@ -16,6 +16,7 @@ export class HeaderComponent implements OnInit {
   isSidebarOpen = false;
   @ViewChild('logoutDialog') logoutDialog!: TemplateRef<any>;
   username: string = '';
+  userAccess: Map<string, boolean> = new Map();
 
   constructor(
     private authService: AuthService,
@@ -28,43 +29,44 @@ export class HeaderComponent implements OnInit {
     if (this.authService.isAuthenticated()) {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       this.username = user.username || 'Guest'; // Default to 'Guest' if username is not available
-      this.fetchUserAccess();
+      // this.fetchUserAccess();
     } else {
       console.error('User is not authenticated');
       this.router.navigate(['/login']);
     }
   }
 
-  fetchUserAccess(): void {
-    const userId: string | null = this.authService.getUserId();
-    
-    if (userId) {
-      console.log('Retrieved userId:', userId); // Log userId for debugging
-      const numericUserId = parseInt(userId, 10);
-      
-      if (!isNaN(numericUserId)) {
-        console.log('Numeric userId:', numericUserId); // Log numericUserId for debugging
-        
-        this.accessService.getUserAccess(numericUserId).subscribe(
-          (accessMap) => {
-            // Convert Map to Object
-            const accessObj = Array.from(accessMap.entries()).reduce((acc, [key, value]) => {
-              acc[key] = value;
-              return acc;
-            }, {} as { [key: string]: boolean });
-            localStorage.setItem('userAccess', JSON.stringify(accessObj));
-          },
-          (error) => {
-            console.error('Failed to fetch user access map', error);
-          }
-        );
-      } else {
-        console.error('Invalid numericUserId:', numericUserId);
-      }
-    } else {
-      console.error('User ID is not available');
-    }
-  }
+  // fetchUserAccess(): void {
+  //   const userId = this.authService.getUserId();
+
+  //   if (userId) {
+  //     console.log('Retrieved userId:', userId); // Log userId for debugging
+  //     const numericUserId = parseInt(userId.toString(), 10);
+
+  //     if (!isNaN(numericUserId)) {
+  //       console.log('Numeric userId:', numericUserId); // Log numericUserId for debugging
+
+  //       this.authService.fetchUserAccess(numericUserId).subscribe(
+  //         (accessMap) => {
+  //           this.userAccess = accessMap;
+  //           // Convert Map to Object and store it in localStorage
+  //           const accessObj = Array.from(accessMap.entries()).reduce((acc, [key, value]) => {
+  //             acc[key] = value;
+  //             return acc;
+  //           }, {} as { [key: string]: boolean });
+  //           localStorage.setItem('userAccess', JSON.stringify(accessObj));
+  //         },
+  //         (error) => {
+  //           console.error('Failed to fetch user access map', error);
+  //         }
+  //       );
+  //     } else {
+  //       console.error('Invalid numericUserId:', numericUserId);
+  //     }
+  //   } else {
+  //     console.error('User ID is not available');
+  //   }
+  // }
 
   canAccess(page: string): boolean {
     const accessMapStr = localStorage.getItem('userAccess');

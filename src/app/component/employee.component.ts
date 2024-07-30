@@ -17,7 +17,7 @@ export class EmployeeComponent implements OnInit {
   selectedEmployeeForm: FormGroup = new FormGroup({
     firstName: new FormControl('', Validators.required),
     lastName: new FormControl('', Validators.required),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    emailId: new FormControl('', [Validators.required, Validators.email]),
     dateOfBirth: new FormControl('', [Validators.required, this.dateValidator]),
   });
 
@@ -129,6 +129,13 @@ export class EmployeeComponent implements OnInit {
   }
 
   onSaveNew(employeeData: Employee): void {
+    const request = {
+      "firstName": this.employee.firstName,
+      "lastName": this.employee.lastName,
+      "emailId": this.employee.emailId,
+      "dateOfBirth": this.formatDateForForm(employeeData.dateOfBirth)
+    };
+    console.log(this.formatDateForForm(employeeData.dateOfBirth));
     this.employeeService.createEmployee(employeeData).subscribe(
       () => {
         this.loadEmployees();
@@ -159,6 +166,7 @@ export class EmployeeComponent implements OnInit {
   onDelete(id: number): void {
     this.employeeToDeleteId = id;
     this.showDeleteModal = true;
+    this.dialog.open(this.deleteDialogTemplate);
   }
 
   confirmDelete(): void {
@@ -166,7 +174,7 @@ export class EmployeeComponent implements OnInit {
       this.employeeService.deleteEmployee(this.employeeToDeleteId).subscribe(
         () => {
           this.loadEmployees();
-          this.cancelDelete();
+          // this.cancelDelete();
           this.showDeleteToastMessage('Employee deleted successfully');
         },
         error => {
@@ -177,10 +185,10 @@ export class EmployeeComponent implements OnInit {
     }
   }
 
-  cancelDelete(): void {
-    this.employeeToDeleteId = null;
-    this.showDeleteModal = false;
-  }
+  // cancelDelete(): void {
+  //   this.employeeToDeleteId = null;
+  //   this.showDeleteModal = false;
+  // }
 
   closeDialog(): void {
     this.dialog.closeAll();
