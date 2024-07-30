@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -16,8 +16,8 @@ export class ProfileComponent implements OnInit {
   @ViewChild('deleteAccountDialog') deleteAccountDialog!: TemplateRef<any>;
 
   constructor(
+    public dialog: MatDialog,
     private authService: AuthService,
-    private dialog: MatDialog,
     private router: Router
   ) {}
 
@@ -27,10 +27,16 @@ export class ProfileComponent implements OnInit {
 
   loadUserProfile(): void {
     this.authService.getUserProfile().subscribe({
-      next: (profile: UserProfile) => this.userProfile = profile,
+      next: (profile: UserProfile) => {
+        this.userProfile = profile;
+      },
       error: (error: any) => {
         console.error('Error fetching user profile', error);
-        this.errorMessage = 'Unable to load user profile. Please try again.';
+        if (error.status === 404) {
+          this.errorMessage = 'User profile not found.';
+        } else {
+          this.errorMessage = 'Unable to load user profile. Please try again.';
+        }
       }
     });
   }
@@ -42,7 +48,8 @@ export class ProfileComponent implements OnInit {
   deleteAccount(): void {
     this.authService.deleteAccount().subscribe({
       next: () => {
-        this.router.navigate(['/login']); // Redirect to login page after successful deletion
+        this.authService.logout();
+        this.router.navigate(['/login']);
       },
       error: (error: any) => {
         console.error('Error deleting account', error);

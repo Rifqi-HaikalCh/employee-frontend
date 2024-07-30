@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Employee } from '../models/employee.model';
 import { AuthService } from './auth.service';
+import { Employee } from '../models/employee.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,35 +16,39 @@ export class EmployeeService {
     private authService: AuthService
   ) {}
 
-  // Uncomment and use this method if you need to set headers for authentication
-  // private getAuthHeaders(): HttpHeaders {
-  //   const token = localStorage.getItem('token');
-  //   return new HttpHeaders({
-  //     'Authorization': `Bearer ${token}`
-  //   });
-  // }
-
-  getAllEmployees(): Observable<Employee[]> {
-    console.log(this.http.get<Employee[]>(`${this.baseUrl}`))
-    return this.http.get<Employee[]>(`${this.baseUrl}`).pipe(
-      catchError(this.handleError)
-    );
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 
+  getAllEmployees(): Observable<Employee[]> {
+    return this.http.get<Employee[]>(this.baseUrl, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+    
+  }
+
+
   createEmployee(employee: Employee): Observable<Employee> {
-    return this.http.post<Employee>(`${this.baseUrl}`, employee).pipe(
+    return this.http.post<Employee>(this.baseUrl, employee, { headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   updateEmployee(id: number, employee: Employee): Observable<Employee> {
-    return this.http.put<Employee>(`${this.baseUrl}/${id}`, employee).pipe(
+    return this.http.put<Employee>(`${this.baseUrl}/${id}`, employee, { headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteEmployee(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError)
     );
   }

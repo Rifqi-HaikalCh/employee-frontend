@@ -5,5 +5,6 @@ export interface JwtResponse {
     email: string;
     role: string;
     accessMap: { [key: string]: boolean }; // Adjust as necessary
+    username: string; // Add this line
   }
   

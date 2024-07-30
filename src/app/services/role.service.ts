@@ -21,27 +21,42 @@ export interface UserElement {
   providedIn: 'root'
 })
 export class RoleService {
-  private baseUrl = 'http://localhost:8081/api/v1/roles';
+  private baseUrl = 'http://localhost:8081/api/v1';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
+      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
   }
 
   getAllUsers(): Observable<UserElement[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<UserElement[]>(`${this.baseUrl}/users`, { headers }).pipe(
+    return this.http.get<UserElement[]>(`${this.baseUrl}/roles/users`, { headers }).pipe(
       catchError(this.handleError)
     );
   }
 
   updateUserRole(id: number, roleId: number): Observable<void> {
     const headers = this.getAuthHeaders();
-    return this.http.put<void>(`${this.baseUrl}/users/${id}/role?roleId=${roleId}`, {}, { headers }).pipe(
+    return this.http.put<void>(`${this.baseUrl}/roles/users/${id}/role`, { roleId }, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUserAccess(userId: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<any>(`${this.baseUrl}/access/${userId}`, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUserProfile(username: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<any>(`${this.baseUrl}/access/profile/${username}`, { headers }).pipe(
       catchError(this.handleError)
     );
   }

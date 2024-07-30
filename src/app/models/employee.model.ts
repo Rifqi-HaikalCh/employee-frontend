@@ -1,15 +1,7 @@
-export class Employee {
-  id?: number;
+export interface Employee {
+  id: number; // change to number if it represents a numeric ID
   firstName: string;
   lastName: string;
   emailId: string;
   dateOfBirth: Date;
-
-  constructor() {
-    this.id = undefined;
-    this.firstName = '';
-    this.lastName = '';
-    this.emailId = '';
-    this.dateOfBirth = new Date();
-  }
 }

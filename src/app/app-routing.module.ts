@@ -7,7 +7,6 @@ import { DashboardComponent } from './component/dashboard.component';
 import { EmployeeComponent } from './component/employee.component';
 import { RoleMenuComponent } from './component/role-menu.component';
 import { AuthGuard } from './guards/auth.guard';
-import { RoleGuard } from './guards/role.guard';
 
 const routes: Routes = [
   { path: 'register', component: RegisterComponent },

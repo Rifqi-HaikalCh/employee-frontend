@@ -14,8 +14,9 @@ export class AuthService {
   private baseUrl = 'http://localhost:8081/api/v1';
   private authUrl = 'http://localhost:8081/auth';
   private roleUrl = 'http://localhost:8081/api/v1/roles';
-  private loggedInUser: User | null = null;
+  private loggedInUser: User | any = null;
   private userAccess: Map<string, boolean> = new Map();
+  private userProfile: UserProfile | null = null;
 
   constructor(private http: HttpClient) {
     this.initializeUser();
@@ -76,30 +77,11 @@ export class AuthService {
     return this.userAccess;
   }
 
-  getAllUsers(): Observable<UserRoleDto[]> {
-    return this.http.get<UserRoleDto[]>(this.roleUrl);
-  }
-  
   getUserPermissions(): Observable<any> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
     return this.http.get<any>(`${this.baseUrl}/permissions`, { headers });
-  }
-
-  fetchUserAccess(): Observable<Map<string, boolean>> {
-    const userId = this.getUserId();
-    if (!userId) {
-      return of(new Map<string, boolean>());
-    }
-    return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
-      map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
-      tap(accessMap => {
-        this.userAccess = accessMap;
-        localStorage.setItem('userAccess', JSON.stringify(Object.fromEntries(accessMap)));
-      }),
-      catchError(this.handleError)
-    );
   }
 
   login(username: string, password: string): Observable<JwtResponse> {
@@ -118,51 +100,106 @@ export class AuthService {
           this.logout(); // Ensure logout on failed authentication
         }
       }),
-      catchError(this.handleError)
+      catchError(this.handleError<JwtResponse>('login'))
     );
   }
 
   register(username: string, email: string, password: string, confirmation: string): Observable<any> {
     return this.http.post<any>(`${this.authUrl}/register`, { username, email, password, confirmation }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError<any>('register'))
+    );
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
+      tap(profile => this.userProfile = profile),
+      catchError(this.handleError<UserProfile>('getUserProfile'))
     );
   }
 
   updateUserProfile(user: User): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/users/profile`, user, { headers: this.getAuthHeaders() }).pipe(
-      tap(updatedUser => {
-        this.loggedInUser = updatedUser;
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-      }),
-      catchError(this.handleError)
+      tap(this.updateLoggedInUser.bind(this)),
+      catchError(this.handleError<User>('updateUserProfile'))
     );
   }
 
-  getUserProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError)
+  deleteAccount(): Observable<string> {
+    return this.http.delete<string>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
+      tap(() => this.logout()),
+      catchError(this.handleError<string>('deleteAccount'))
     );
   }
-  
-  deleteAccount(): Observable<void> {
-    const userId = this.getUserId();
-    if (!userId) {
-      return throwError(() => new Error('User is not logged in'));
+
+  getUserProfileByUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/access/profile/${username}`, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError<any>('getUserProfileByUsername'))
+    );
+  }
+
+  getStoredUserProfile(): UserProfile | null {
+    return this.userProfile;
+  }
+
+  private updateLoggedInUser(user: User): void {
+    if (this.userProfile) {
+      this.userProfile.username = user.username;
+      this.userProfile.email = user.email;
+      this.userProfile.role = user.role;
     }
-    return this.http.delete<void>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
-      tap(() => {
-        this.logout();
-      }),
-      catchError(this.handleError)
-    );
-  }
-  
-  saveToken(token: string): void {
-    localStorage.setItem('token', token);
   }
 
-  private handleError(error: any): Observable<never> {
-    console.error('An error occurred', error);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
+  // Access control endpoints
+  fetchUserAccess(userId: string): Observable<Map<string, boolean>> {
+    return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
+      map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
+      tap(this.updateUserAccess.bind(this)),
+      catchError(this.handleError<Map<string, boolean>>('fetchUserAccess'))
+    );
+  }
+
+  // Role management endpoints
+  getAllUsers(): Observable<UserRoleDto[]> {
+    return this.http.get<UserRoleDto[]>(`${this.baseUrl}/roles/users`, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError<UserRoleDto[]>('getAllUsers'))
+    );
+  }
+
+  updateUserRole(userId: number, roleId: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/roles/users/${userId}/role`, { roleId }, { headers: this.getAuthHeaders() }).pipe(
+      catchError(this.handleError<void>('updateUserRole'))
+    );
+  }
+
+  // Helper methods
+  private handleAuthResponse(response: JwtResponse): void {
+    if (response.authenticated) {
+      localStorage.setItem('token', response.token);
+      this.loggedInUser = {
+        username: response.username,
+        email: response.email,
+        role: response.role
+      };
+      localStorage.setItem('user', JSON.stringify(this.loggedInUser));
+      this.updateUserAccess(new Map(Object.entries(response.accessMap)));
+    } else {
+      this.logout();
+    }
+  }
+
+  private updateUserAccess(accessMap: Map<string, boolean>): void {
+    this.userAccess = accessMap;
+    localStorage.setItem('userAccess', JSON.stringify(Object.fromEntries(accessMap)));
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(`${operation} failed: ${error.message}`);
+      return of(result as T);
+    };
   }
 }
