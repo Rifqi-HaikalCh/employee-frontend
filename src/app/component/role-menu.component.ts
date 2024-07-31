@@ -14,6 +14,11 @@ export interface UserRoleDto {
   };
 }
 
+export interface RoleFeature {
+  role: string;
+  features: { name: string; enabled: boolean }[];
+}
+
 @Component({
   selector: 'app-role-menu',
   templateUrl: './role-menu.component.html',
@@ -26,13 +31,17 @@ export class RoleMenuComponent implements OnInit {
   displayedColumns: string[] = ['id', 'username', 'user', 'super-admin', 'staff-admin', 'control-admin'];
   dataSource = new MatTableDataSource<UserRoleDto>([]);
 
-  detailRoleDisplayedColumns: string[] = ['role', 'features'];
-  detailRoleDataSource = new MatTableDataSource<any>([
-    { role: 'Super Admin', features: ['employeeList', 'roleMenuFunction'] },
-    { role: 'Staff Admin', features: ['employeeList'] },
-    { role: 'Control Admin', features: ['roleMenuFunction'] },
-    { role: 'User', features: [] }
+  detailRoleDisplayedColumns: string[] = ['feature'];
+  detailRoleDataSource: MatTableDataSource<RoleFeature> = new MatTableDataSource<RoleFeature>([
+    { role: 'Super Admin', features: [{ name: 'employeeList', enabled: true }, { name: 'roleMenuFunction', enabled: true }] },
+    { role: 'Staff Admin', features: [{ name: 'employeeList', enabled: true }, { name: 'roleMenuFunction', enabled: false }] },
+    { role: 'Control Admin', features: [{ name: 'employeeList', enabled: false }, { name: 'roleMenuFunction', enabled: true }] },
+    { role: 'User', features: [{ name: 'employeeList', enabled: false }, { name: 'roleMenuFunction', enabled: false }] }
   ]);
+
+  featureDisplayedColumns: string[] = ['feature'];
+  featureDataSource = new MatTableDataSource<{ name: string; enabled: boolean }>([]);
+  selectedRole: RoleFeature | null = null;
 
   constructor(
     private dialog: MatDialog,
@@ -59,13 +68,13 @@ export class RoleMenuComponent implements OnInit {
     this.dialog.open(this.detailRoleDialog);
   }
 
-  onRoleSelectionChange(row: UserRoleDto, role: keyof UserRoleDto['roles']) {
-    if (role === 'user' && row.roles.user) {
-      // User role cannot be removed
-      return;
-    }
+  onRoleChange(role: RoleFeature) {
+    this.selectedRole = role;
+    this.featureDataSource.data = role.features;
+  }
 
-    // Count the number of active roles
+  onRoleSelectionChange(row: UserRoleDto, role: keyof UserRoleDto['roles']) {
+    // Ensure only one role is selected at a time
     const selectedRoles = Object.values(row.roles).filter(value => value).length;
     if (selectedRoles > 1) {
       alert('Only one role can be selected at a time!');

@@ -4,42 +4,59 @@
     <button mat-raised-button color="primary" (click)="openDetailRoleDialog()">View Detail Role</button>
   </div>
 
-  <!-- Confirmation Dialog -->
-  <ng-template #confirmationDialog let-data>
-    <h2 mat-dialog-title>Confirm Role Assignment</h2>
-    <mat-dialog-content>Are you sure you want to assign {{data.role}} role to {{data.row.username}}?</mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-button mat-dialog-close>No</button>
-      <button mat-button (click)="confirmRoleChange(data.row, data.role)" mat-dialog-close>Yes</button>
-    </mat-dialog-actions>
-  </ng-template>
+<!-- Dialog -->
+<ng-template #confirmationDialog let-data>
+  <h2 mat-dialog-title>Role Assignment</h2>
+  <mat-dialog-content>You are about to assign the {{data.role}} role to {{data.row.username}}</mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button (click)="confirmRoleChange(data.row, data.role)" mat-dialog-close>Yes</button>
+  </mat-dialog-actions>
+</ng-template>
 
-  <!-- Detail Role Dialog -->
-  <ng-template #detailRoleDialog>
-    <h2 mat-dialog-title>Detail Role</h2>
-    <mat-dialog-content>
-      <table mat-table [dataSource]="detailRoleDataSource" class="mat-elevation-z8">
-        <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef>Role</th>
-          <td mat-cell *matCellDef="let element">{{element.role}}</td>
-        </ng-container>
-        <ng-container matColumnDef="features">
-          <th mat-header-cell *matHeaderCellDef>Features</th>
-          <td mat-cell *matCellDef="let element">
-            <mat-checkbox *ngFor="let feature of element.features" [checked]="true" disabled>
-              {{feature}}
+<!-- Detail Role Dialog -->
+<ng-template #detailRoleDialog>
+  <h2 mat-dialog-title>Detail Role</h2>
+  <mat-dialog-content>
+    <mat-radio-group aria-label="Select Role">
+      <mat-radio-button *ngFor="let role of detailRoleDataSource.data" 
+                        [value]="role.role" 
+                        (change)="onRoleChange(role)">
+        {{ role.role }}
+      </mat-radio-button>
+    </mat-radio-group>
+
+    <div *ngIf="selectedRole">
+      <!-- <h6>Features for {{ selectedRole.role }}</h6> -->
+       <br>
+      <table mat-table [dataSource]="featureDataSource" class="mat-elevation-z8">
+        <ng-container matColumnDef="feature">
+          <th mat-header-cell *matHeaderCellDef>Feature</th>
+          <td mat-cell *matCellDef="let feature">
+            <mat-checkbox [checked]="feature.enabled" disabled>
+              {{ feature.name }}
             </mat-checkbox>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="detailRoleDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: detailRoleDisplayedColumns;"></tr>
+        <tr mat-header-row *matHeaderRowDef="featureDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: featureDisplayedColumns;"></tr>
       </table>
-    </mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-button mat-dialog-close>Close</button>
-    </mat-dialog-actions>
-  </ng-template>
+
+      <div class="role-description">
+        <p *ngIf="selectedRole.role === 'User'">Account has no access to either feature.</p>
+        <p *ngIf="selectedRole.role === 'Super Admin'">Account has access to both features.</p>
+        <p *ngIf="selectedRole.role === 'Control Admin'">Account has access only to the Role Menu Function feature.</p>
+        <p *ngIf="selectedRole.role === 'Staff Admin'">Account has access only to the Employee List feature.</p>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Close</button>
+  </mat-dialog-actions>
+</ng-template>
+
+
+
 
   <!-- User Role Table -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
@@ -59,11 +76,9 @@
     <ng-container matColumnDef="user">
       <th mat-header-cell *matHeaderCellDef>User</th>
       <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="onRoleSelectionChange(row, 'user')"
-                      [checked]="row.roles.user"
-                      [aria-label]="'Select ' + row.username + ' as User'">
-        </mat-checkbox>
+        <mat-radio-group (change)="onRoleSelectionChange(row, 'user')">
+          <mat-radio-button value="1" [checked]="row.roles.user"></mat-radio-button>
+        </mat-radio-group>
       </td>
     </ng-container>
 
@@ -71,11 +86,9 @@
     <ng-container matColumnDef="super-admin">
       <th mat-header-cell *matHeaderCellDef>Super Admin</th>
       <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="onRoleSelectionChange(row, 'superAdmin')"
-                      [checked]="row.roles.superAdmin"
-                      [aria-label]="'Select ' + row.username + ' as Super Admin'">
-        </mat-checkbox>
+        <mat-radio-group (change)="onRoleSelectionChange(row, 'superAdmin')">
+          <mat-radio-button value="2" [checked]="row.roles.superAdmin"></mat-radio-button>
+        </mat-radio-group>
       </td>
     </ng-container>
 
@@ -83,11 +96,9 @@
     <ng-container matColumnDef="staff-admin">
       <th mat-header-cell *matHeaderCellDef>Staff Admin</th>
       <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="onRoleSelectionChange(row, 'staffAdmin')"
-                      [checked]="row.roles.staffAdmin"
-                      [aria-label]="'Select ' + row.username + ' as Staff Admin'">
-        </mat-checkbox>
+        <mat-radio-group (change)="onRoleSelectionChange(row, 'staffAdmin')">
+          <mat-radio-button value="3" [checked]="row.roles.staffAdmin"></mat-radio-button>
+        </mat-radio-group>
       </td>
     </ng-container>
 
@@ -95,11 +106,9 @@
     <ng-container matColumnDef="control-admin">
       <th mat-header-cell *matHeaderCellDef>Control Admin</th>
       <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="onRoleSelectionChange(row, 'controlAdmin')"
-                      [checked]="row.roles.controlAdmin"
-                      [aria-label]="'Select ' + row.username + ' as Control Admin'">
-        </mat-checkbox>
+        <mat-radio-group (change)="onRoleSelectionChange(row, 'controlAdmin')">
+          <mat-radio-button value="4" [checked]="row.roles.controlAdmin"></mat-radio-button>
+        </mat-radio-group>
       </td>
     </ng-container>
 

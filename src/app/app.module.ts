@@ -41,7 +41,7 @@ import { PhotoService } from './services/photo.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.Interceptor';
 import { AccessService } from './services/access.service';
-
+import {MatRadioModule} from '@angular/material/radio';
 
 
 @NgModule({
@@ -62,6 +62,7 @@ import { AccessService } from './services/access.service';
     HttpClientModule,
     MatCheckboxModule,
     MatInputModule,
+    MatRadioModule,
     MatSelectModule,
     MatMenuModule,
     MatTableModule,

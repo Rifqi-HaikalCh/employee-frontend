@@ -1,16 +1,11 @@
-<div class="relative w-full carousel-container">
-  <p-galleria 
-    [value]="images" 
-    (valueChange)="onImagesChange($event)" 
-    [numVisible]="5" 
-    [circular]="true" 
-    [showItemNavigators]="true" 
-    [showThumbnails]="false" 
-    [responsiveOptions]="responsiveOptions" 
-    [containerStyle]="{ 'width': '100%' }"
-    #galleria>
-    <ng-template pTemplate="item" let-item>
-      <img [src]="item.itemImageSrc" class="w-full h-auto" />
-    </ng-template>
-  </p-galleria>
+<div class="carousel-container">
+  <div class="carousel" #carousel>
+    <div class="carousel-items">
+      <div class="carousel-item" *ngFor="let image of images">
+        <img [src]="image.itemImageSrc" [alt]="image.alt" class="carousel-image" />
+      </div>
+    </div>
+    <button class="carousel-prev" (click)="prev()">&#10094;</button>
+    <button class="carousel-next" (click)="next()">&#10095;</button>
+  </div>
 </div>
