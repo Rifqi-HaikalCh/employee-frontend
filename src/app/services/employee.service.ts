@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
-import { Employee } from '../models/employee.model';
+import { Employee } from '../models/employee.model';// Ensure you have this import
+import { AuthService } from './auth.service'; // Ensure you have this import
 
 @Injectable({
   providedIn: 'root'
@@ -28,32 +28,39 @@ export class EmployeeService {
   }
 
   getAllEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(this.baseUrl, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-    
+    return this.http.get<Employee[]>(this.baseUrl, { headers: this.getAuthHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
-  createEmployee(employee: any): Observable<Employee> {
-    return this.http.post<Employee>(this.baseUrl, employee, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError)
-    );
+  createEmployee(employee: Employee): Observable<Employee> {
+    return this.http.post<Employee>(this.baseUrl, employee, { headers: this.getAuthHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   updateEmployee(id: number, employee: Employee): Observable<Employee> {
-    return this.http.put<Employee>(`${this.baseUrl}/${id}`, employee, { headers: this.getAuthHeaders() }).pipe(
+    return this.http.put<Employee>(`${this.baseUrl}/${id}`, employee, { headers: this.getAuthHeaders() })
+      .pipe(catchError(this.handleError));
+  }
+
+  deleteEmployee(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`, {
+      headers: this.getAuthHeaders(),
+      responseType: 'text'
+    }).pipe(
       catchError(this.handleError)
     );
   }
 
-  deleteEmployee(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  private handleError(error: any) {
-    console.error('An error occurred', error);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An unknown error occurred!';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Backend returned an unsuccessful response code
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    console.error(errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }

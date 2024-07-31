@@ -85,7 +85,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
-  }
+  } 
 
   getUserRole(): string | null {
     if (!this.loggedInUser || !this.loggedInUser.roles) {
@@ -156,7 +156,7 @@ export class AuthService {
   }
 
   getUserProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.baseUrl}/users/profile`, { headers: this.getAuthHeaders() }).pipe(
+    return this.http.get<UserProfile>(`${this.baseUrl}/access/profile/${this.loggedInUser?.username}`, { headers: this.getAuthHeaders() }).pipe(
       tap(profile => this.userProfile = profile),
       catchError(this.handleError<UserProfile>('getUserProfile'))
     );
@@ -176,48 +176,13 @@ export class AuthService {
     );
   }
 
-  getUserProfileByUsername(username: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/access/profile/${username}`, { headers: this.getAuthHeaders() }).pipe(
-      catchError(this.handleError<any>('getUserProfileByUsername'))
-    );
-  }
-
-  getStoredUserProfile(): UserProfile | null {
-    return this.userProfile;
-  }
-
-  private updateLoggedInUser(user: UserRoleDto): void {
-    if (this.userProfile) {
-      this.userProfile.username = user.username;
-      // Correctly update email and role from the provided user object
-      this.userProfile.email = 'email@domain.com'; // replace with actual email if needed
-      this.userProfile.role = this.getUserRoleFromRoles(user.roles);
-    }
-  }
-
-  private getUserRoleFromRoles(roles: { user: boolean; superAdmin: boolean; staffAdmin: boolean; controlAdmin: boolean }): string {
-    if (roles.superAdmin) {
-      return 'SUPER_ADMIN';
-    } else if (roles.staffAdmin) {
-      return 'STAFF_ADMIN';
-    } else if (roles.controlAdmin) {
-      return 'CONTROL_ADMIN';
-    } else if (roles.user) {
-      return 'USER';
-    }
-    return '';
-  }
-
-  // Access control endpoints
   fetchUserAccess(userId: number): Observable<Map<string, boolean>> {
-    return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
-      map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
+    return this.http.get<Map<string, boolean>>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
       tap(this.updateUserAccess.bind(this)),
-      catchError(this.handleError<Map<string, boolean>>('fetchUserAccess'))
+      catchError(this.handleError<Map<string, boolean>>('fetchUserAccess', new Map()))
     );
   }
 
-  // Role management endpoints
   getAllUsers(): Observable<UserRoleDto[]> {
     return this.http.get<UserRoleDto[]>(`${this.baseUrl}/roles/users`, { headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError<UserRoleDto[]>('getAllUsers'))
@@ -230,7 +195,6 @@ export class AuthService {
     );
   }
 
-  // Helper methods
   private handleAuthResponse(response: JwtResponse): void {
     if (response.authenticated) {
       localStorage.setItem('token', response.token);
@@ -245,18 +209,23 @@ export class AuthService {
         }
       };
       localStorage.setItem('user', JSON.stringify(this.loggedInUser));
-      this.updateUserAccess(new Map(Object.entries(response.accessMap)));
+      localStorage.setItem('userAccess', JSON.stringify(response.accessMap));
     } else {
-      this.logout();
+      this.logout(); // Ensure logout on failed authentication
     }
   }
 
-  private updateUserAccess(access: Map<string, boolean>): void {
-    this.userAccess = access;
-    localStorage.setItem('userAccess', JSON.stringify(Array.from(access.entries())));
+  private updateUserAccess(accessMap: Map<string, boolean>): void {
+    this.userAccess = accessMap;
+    localStorage.setItem('userAccess', JSON.stringify(Array.from(accessMap.entries())));
   }
 
-  private handleError<T>(operation = 'operation', result?: T) {
+  private updateLoggedInUser(user: UserRoleDto): void {
+    this.loggedInUser = user;
+    localStorage.setItem('user', JSON.stringify(this.loggedInUser));
+  }
+
+  private handleError<T>(operation = 'operation', result?: T): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`);
       return of(result as T);

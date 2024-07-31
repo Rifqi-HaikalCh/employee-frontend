@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../services/auth.service';
 import { EmployeeService } from '../services/employee.service';
 import { Employee } from '../models/employee.model';
@@ -25,8 +25,8 @@ export class EmployeeComponent implements OnInit {
   employees: Employee[] = [];
   selectedEmployee: Employee = { id: 0, firstName: '', lastName: '', emailId: '', dateOfBirth: new Date() };
   isNew: boolean = true;
-  showDeleteModal: boolean = false;
-  employeeToDeleteId: number | null = null;
+  employeeToDelete: any;
+  showDeleteModal = false;
   dataSource: MatTableDataSource<Employee> = new MatTableDataSource();
   displayedColumns: string[] = ['id', 'firstName', 'lastName', 'emailId', 'dateOfBirth', 'actions'];
   toastMessage: string = '';
@@ -54,22 +54,27 @@ export class EmployeeComponent implements OnInit {
   }
 
   checkUserAccess(): void {
-    const userId = this.authService.getUserId();
-    if (userId) {
-      this.authService.fetchUserAccess(userId).subscribe(
-        (accessMap: Map<string, boolean>) => {
-          this.canEdit = accessMap.get('canEditEmployee') || false;
-          this.canDelete = accessMap.get('canDeleteEmployee') || false;
-          this.canAdd = accessMap.get('canAddEmployee') || false;
-        },
-        error => {
-          console.error('Failed to fetch user access:', error);
-        }
-      );
+    if (this.authService.isAuthenticated()) {
+      const userId = this.authService.getUserId(); // Retrieve the userId
+      if (userId !== null) {
+        this.authService.fetchUserAccess(userId).subscribe(
+          (accessMap: Map<string, boolean>) => {
+            this.canEdit = accessMap.get('canEditEmployee') || false;
+            this.canDelete = accessMap.get('canDeleteEmployee') || false;
+            this.canAdd = accessMap.get('canAddEmployee') || false;
+          },
+          error => {
+            console.error('Failed to fetch user access:', error);
+          }
+        );
+      } else {
+        console.error('User ID is not available');
+      }
     } else {
       console.error('User is not logged in');
     }
   }
+  
 
   private loadEmployees() {
     this.employeeService.getAllEmployees().subscribe((employees: any[]) => {
@@ -163,19 +168,20 @@ export class EmployeeComponent implements OnInit {
     );
   }
 
-  onDelete(id: number): void {
-    this.employeeToDeleteId = id;
-    this.showDeleteModal = true;
-    this.dialog.open(this.deleteDialogTemplate);
+  onDelete(employee: any): void {
+    this.employeeToDelete = employee;
+    const dialogRef = this.dialog.open(this.deleteDialogTemplate, {
+      data: { employee: employee }
+    });
   }
-
-  confirmDelete(): void {
-    if (this.employeeToDeleteId !== null) {
-      this.employeeService.deleteEmployee(this.employeeToDeleteId).subscribe(
-        () => {
+  
+  confirmDelete(dialogRef: MatDialogRef<any>): void {
+    if (this.employeeToDelete) {
+      this.employeeService.deleteEmployee(this.employeeToDelete.id).subscribe(
+        (response: string) => {
           this.loadEmployees();
-          // this.cancelDelete();
-          this.showDeleteToastMessage('Employee deleted successfully');
+          this.showDeleteToastMessage(response || 'Employee deleted successfully');
+          dialogRef.close();
         },
         error => {
           console.error('Failed to delete employee:', error);
@@ -184,11 +190,10 @@ export class EmployeeComponent implements OnInit {
       );
     }
   }
-
-  // cancelDelete(): void {
-  //   this.employeeToDeleteId = null;
-  //   this.showDeleteModal = false;
-  // }
+  
+  close(dialogRef: MatDialogRef<any>): void {
+    dialogRef.close();
+  }
 
   closeDialog(): void {
     this.dialog.closeAll();
