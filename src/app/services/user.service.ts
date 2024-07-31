@@ -6,10 +6,6 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UserService {
-  getUser(id: number) {
-    throw new Error('Method not implemented.');
-  }
-
   private apiUrl = 'http://localhost:8081/api/v1/roles'; // Adjust URL based on your backend
 
   constructor(private http: HttpClient) { }
@@ -30,9 +26,9 @@ export class UserService {
   }
 
   updateUserRole(userId: number, roleName: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/users/${userId}/role`, {}, {
-      headers: this.getAuthHeaders(),
-      params: { roleName }
-    });
+    return this.http.put<any>(`${this.apiUrl}/users/roles`, 
+      [{ userId, roleName }], // Send as a list of updates
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

@@ -1,9 +1,18 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
-import { UserRoleDto } from "../services/auth.service";
 import { MatDialog } from "@angular/material/dialog";
 import { UserService } from "../services/user.service";
 
+export interface UserRoleDto {
+  id: number;
+  username: string;
+  roles: {
+    user: boolean;
+    superAdmin: boolean;
+    staffAdmin: boolean;
+    controlAdmin: boolean;
+  };
+}
 
 @Component({
   selector: 'app-role-menu',
@@ -36,7 +45,7 @@ export class RoleMenuComponent implements OnInit {
 
   loadUserData() {
     this.userService.getAllUsers().subscribe(
-      (data) => {
+      (data: UserRoleDto[]) => {
         console.log(data);
         this.dataSource.data = data;
       },
@@ -56,6 +65,7 @@ export class RoleMenuComponent implements OnInit {
       return;
     }
 
+    // Count the number of active roles
     const selectedRoles = Object.values(row.roles).filter(value => value).length;
     if (selectedRoles > 1) {
       alert('Only one role can be selected at a time!');
@@ -70,19 +80,9 @@ export class RoleMenuComponent implements OnInit {
     Object.keys(row.roles).forEach(key => row.roles[key as keyof UserRoleDto['roles']] = false);
     // Set the new role
     row.roles[role] = true;
-    // Update the checkbox states
-    this.updateCheckboxStates(row);
+    
     // Update the user role
     this.updateUserRole(row);
-  }
-
-  updateCheckboxStates(row: UserRoleDto) {
-    // Ensure at least one role is active
-    const hasActiveRole = Object.values(row.roles).some(value => value);
-    if (!hasActiveRole) {
-      // Default to user role if no active roles
-      row.roles['user'] = true; // Ensure 'user' role is active
-    }
   }
 
   updateUserRole(row: UserRoleDto) {

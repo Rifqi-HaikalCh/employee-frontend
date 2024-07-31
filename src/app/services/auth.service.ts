@@ -176,8 +176,12 @@ export class AuthService {
     );
   }
 
-  fetchUserAccess(userId: number): Observable<Map<string, boolean>> {
-    return this.http.get<Map<string, boolean>>(`${this.baseUrl}/access/${userId}`, { headers: this.getAuthHeaders() }).pipe(
+  fetchUserAccess(): Observable<Map<string, boolean>> {
+    if (this.userAccess.size > 0) {
+      return of(this.userAccess);
+    }
+    return this.http.get<{ [key: string]: boolean }>(`${this.baseUrl}/access`, { headers: this.getAuthHeaders() }).pipe(
+      map(accessMap => new Map<string, boolean>(Object.entries(accessMap))),
       tap(this.updateUserAccess.bind(this)),
       catchError(this.handleError<Map<string, boolean>>('fetchUserAccess', new Map()))
     );

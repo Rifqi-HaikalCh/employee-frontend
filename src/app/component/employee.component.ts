@@ -52,30 +52,28 @@ export class EmployeeComponent implements OnInit {
     this.loadEmployees();
     this.checkUserAccess();
   }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
 
   checkUserAccess(): void {
     if (this.authService.isAuthenticated()) {
-      const userId = this.authService.getUserId(); // Retrieve the userId
-      if (userId !== null) {
-        this.authService.fetchUserAccess(userId).subscribe(
-          (accessMap: Map<string, boolean>) => {
-            this.canEdit = accessMap.get('canEditEmployee') || false;
-            this.canDelete = accessMap.get('canDeleteEmployee') || false;
-            this.canAdd = accessMap.get('canAddEmployee') || false;
-          },
-          error => {
-            console.error('Failed to fetch user access:', error);
-          }
-        );
-      } else {
-        console.error('User ID is not available');
-      }
+      this.authService.fetchUserAccess().subscribe(
+        (accessMap: Map<string, boolean>) => {
+          this.canEdit = accessMap.get('canEditEmployee') || false;
+          this.canDelete = accessMap.get('canDeleteEmployee') || false;
+          this.canAdd = accessMap.get('canAddEmployee') || false;
+        },
+        error => {
+          console.error('Failed to fetch user access:', error);
+        }
+      );
     } else {
       console.error('User is not logged in');
     }
   }
   
-
   private loadEmployees() {
     this.employeeService.getAllEmployees().subscribe((employees: any[]) => {
       this.dataSource.data = employees.map(emp => ({
@@ -134,13 +132,6 @@ export class EmployeeComponent implements OnInit {
   }
 
   onSaveNew(employeeData: Employee): void {
-    const request = {
-      "firstName": this.employee.firstName,
-      "lastName": this.employee.lastName,
-      "emailId": this.employee.emailId,
-      "dateOfBirth": this.formatDateForForm(employeeData.dateOfBirth)
-    };
-    console.log(this.formatDateForForm(employeeData.dateOfBirth));
     this.employeeService.createEmployee(employeeData).subscribe(
       () => {
         this.loadEmployees();
@@ -148,12 +139,16 @@ export class EmployeeComponent implements OnInit {
         this.showToastMessage('Employee added successfully');
       },
       error => {
-        console.error('Failed to add employee:', error);
-        this.showToastMessage('Failed to add employee');
+        if (error.status === 400 && error.error.message === 'Email address already exists') {
+          this.showToastMessage('Email address already exists');
+        } else {
+          console.error('Failed to add employee:', error);
+          this.showToastMessage('Failed to add employee, check your email it must be unique');
+        }
       }
     );
   }
-
+  
   onSaveUpdate(employeeData: Employee): void {
     this.employeeService.updateEmployee(this.selectedEmployee.id, employeeData).subscribe(
       () => {
@@ -162,8 +157,12 @@ export class EmployeeComponent implements OnInit {
         this.showToastMessage('Employee updated successfully');
       },
       error => {
-        console.error('Failed to update employee:', error);
-        this.showToastMessage('Failed to update employee');
+        if (error.status === 400 && error.error.message === 'Email address already exists') {
+          this.showToastMessage('Email address already exists');
+        } else {
+          console.error('Failed to update employee:', error);
+          this.showToastMessage('Failed to update employee');
+        }
       }
     );
   }
@@ -202,26 +201,28 @@ export class EmployeeComponent implements OnInit {
   showToastMessage(message: string): void {
     this.toastMessage = message;
     this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-    }, 3000);
+    setTimeout(() => this.showToast = false, 3000);
   }
 
   showDeleteToastMessage(message: string): void {
     this.deleteToastMessage = message;
     this.showDeleteToast = true;
-    setTimeout(() => {
-      this.showDeleteToast = false;
-    }, 3000);
+    setTimeout(() => this.showDeleteToast = false, 3000);
   }
 
-  dateValidator(control: FormControl): { [key: string]: boolean } | null {
-    // Custom date validation logic
+  private formatDateForForm(date: Date): string {
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+  }
+
+  private dateValidator(control: FormControl): { [key: string]: boolean } | null {
+    const dateValue = new Date(control.value);
+    const currentDate = new Date();
+    if (dateValue > currentDate) {
+      return { 'futureDate': true };
+    }
     return null;
   }
-
-  formatDateForForm(date: Date): string {
-    return date.toISOString().split('T')[0]; // Format Date to YYYY-MM-DD
-  }
 }
-  

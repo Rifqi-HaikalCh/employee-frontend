@@ -12,6 +12,7 @@
 <!-- Table to Display Employees -->
 <div class="mat-elevation-z8">
   <table mat-table [dataSource]="dataSource" matSort class="mat-table">
+
     <!-- ID Column -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
@@ -42,19 +43,24 @@
       <td mat-cell *matCellDef="let employee"> {{employee.dateOfBirth | date:'yyyy-MM-dd'}} </td>
     </ng-container>
 
+    <!-- Actions Column -->
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> Actions </th>
       <td mat-cell *matCellDef="let employee">
-        <button mat-button (click)="onEdit(employee)" class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md mr-2">Edit</button>
-        <button mat-button (click)="onDelete(employee)" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md">Delete</button>
+        <button mat-button (click)="onEdit(employee)" class="edit-button">Edit</button>
+        <button mat-button (click)="onDelete(employee)" class="delete-button">Delete</button>
       </td>
-    </ng-container>  
+    </ng-container>
 
+    <!-- Header and Row Definition -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
   </table>
 
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of employees"></mat-paginator>
+  <!-- Paginator -->
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons aria-label="Select page of employees"></mat-paginator>
+
 
   <!-- Dialog Template -->
   <ng-template #dialogTemplate>
@@ -124,6 +130,10 @@
       <button mat-raised-button color="warn" (click)="confirmDelete(dialogRef)">Delete</button>
     </mat-dialog-actions>
   </ng-template>
+
+  <!-- Add this to your employee.component.html -->
+<div *ngIf="showToast" class="toast">{{ toastMessage }}</div>
+<div *ngIf="showDeleteToast" class="toast">{{ deleteToastMessage }}</div>
 
   <!-- Toast Notifications -->
   <mat-snackbar *ngIf="showToast" [message]="toastMessage" [duration]="3000"></mat-snackbar>
