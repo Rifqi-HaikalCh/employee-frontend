@@ -26,8 +26,8 @@ export class UserService {
   }
 
   updateUserRole(userId: number, roleName: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/users/roles`, 
-      [{ userId, roleName }], // Send as a list of updates
+    return this.http.put<any>(`${this.apiUrl}/users/roles/${userId}`, 
+      { roleName }, // Send as a role update
       { headers: this.getAuthHeaders() }
     );
   }

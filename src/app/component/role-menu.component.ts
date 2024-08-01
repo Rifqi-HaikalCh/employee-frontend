@@ -1,16 +1,17 @@
-import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
-import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog } from "@angular/material/dialog";
-import { UserService } from "../services/user.service";
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { UserService } from '../services/user.service';
+import { Role } from '../models/role.enum'; // Ensure the path is correct
 
 export interface UserRoleDto {
   id: number;
   username: string;
   roles: {
-    user: boolean;
-    superAdmin: boolean;
-    staffAdmin: boolean;
-    controlAdmin: boolean;
+    [Role.USER]: boolean;
+    [Role.SUPER_ADMIN]: boolean;
+    [Role.STAFF_ADMIN]: boolean;
+    [Role.CONTROL_ADMIN]: boolean;
   };
 }
 
@@ -28,7 +29,7 @@ export class RoleMenuComponent implements OnInit {
   @ViewChild('confirmationDialog', { static: true }) confirmationDialog!: TemplateRef<any>;
   @ViewChild('detailRoleDialog', { static: true }) detailRoleDialog!: TemplateRef<any>;
 
-  displayedColumns: string[] = ['id', 'username', 'user', 'super-admin', 'staff-admin', 'control-admin'];
+  displayedColumns: string[] = ['id', 'username', 'user', 'superAdmin', 'staffAdmin', 'controlAdmin'];
   dataSource = new MatTableDataSource<UserRoleDto>([]);
 
   detailRoleDisplayedColumns: string[] = ['feature'];
@@ -42,6 +43,8 @@ export class RoleMenuComponent implements OnInit {
   featureDisplayedColumns: string[] = ['feature'];
   featureDataSource = new MatTableDataSource<{ name: string; enabled: boolean }>([]);
   selectedRole: RoleFeature | null = null;
+
+  Role = Role; // Expose the Role enum to the template
 
   constructor(
     private dialog: MatDialog,
@@ -73,20 +76,13 @@ export class RoleMenuComponent implements OnInit {
     this.featureDataSource.data = role.features;
   }
 
-  onRoleSelectionChange(row: UserRoleDto, role: keyof UserRoleDto['roles']) {
-    // Ensure only one role is selected at a time
-    const selectedRoles = Object.values(row.roles).filter(value => value).length;
-    if (selectedRoles > 1) {
-      alert('Only one role can be selected at a time!');
-      return;
-    }
-
+  onRoleSelectionChange(row: UserRoleDto, role: Role) {
     this.dialog.open(this.confirmationDialog, { data: { row, role } });
   }
 
-  confirmRoleChange(row: UserRoleDto, role: keyof UserRoleDto['roles']) {
+  confirmRoleChange(row: UserRoleDto, role: Role) {
     // Reset all roles
-    Object.keys(row.roles).forEach(key => row.roles[key as keyof UserRoleDto['roles']] = false);
+    Object.keys(row.roles).forEach(key => row.roles[key as Role] = false);
     // Set the new role
     row.roles[role] = true;
     
@@ -103,13 +99,15 @@ export class RoleMenuComponent implements OnInit {
           this.loadUserData(); // Refresh user data after update
         },
         (error: any) => {
-          console.error('Error updating user role', error);
+          const errorMessage = error.error.message || error.error || 'Error updating user role';
+          console.error(errorMessage, error);
         }
       );
     }
   }
 
   getSelectedRole(roles: { [key: string]: boolean }): string {
-    return Object.keys(roles).find(role => roles[role]) || 'user';
+    const selectedRole = Object.keys(roles).find(role => roles[role]);
+    return selectedRole ? selectedRole : Role.USER;
   }
 }

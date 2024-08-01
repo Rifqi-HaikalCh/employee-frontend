@@ -10,3 +10,8 @@ export interface UserRoleDto {
     [Role.CONTROL_ADMIN]: boolean;
   };
 }
+
+export interface RoleFeature {
+  role: string;
+  features: { name: string; enabled: boolean }[];
+}

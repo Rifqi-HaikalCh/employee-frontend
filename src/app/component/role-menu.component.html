@@ -55,64 +55,62 @@
   </mat-dialog-actions>
 </ng-template>
 
+<!-- User Role Table -->
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- ID Column -->
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef>No</th>
+    <td mat-cell *matCellDef="let element">{{element.id}}</td>
+  </ng-container>
 
+  <!-- Username Column -->
+  <ng-container matColumnDef="username">
+    <th mat-header-cell *matHeaderCellDef>Username</th>
+    <td mat-cell *matCellDef="let element">{{element.username}}</td>
+  </ng-container>
 
+  <!-- User Role Column -->
+  <ng-container matColumnDef="user">
+    <th mat-header-cell *matHeaderCellDef>User</th>
+    <td mat-cell *matCellDef="let row">
+      <mat-radio-group (change)="onRoleSelectionChange(row, Role.USER)">
+        <mat-radio-button value="1" [checked]="row.roles[Role.USER]"></mat-radio-button>
+      </mat-radio-group>
+    </td>
+  </ng-container>
 
-  <!-- User Role Table -->
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-    <!-- ID Column -->
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef>ID</th>
-      <td mat-cell *matCellDef="let element">{{element.id}}</td>
-    </ng-container>
+  <!-- Super Admin Role Column -->
+  <ng-container matColumnDef="superAdmin">
+    <th mat-header-cell *matHeaderCellDef>Super Admin</th>
+    <td mat-cell *matCellDef="let row">
+      <mat-radio-group (change)="onRoleSelectionChange(row, Role.SUPER_ADMIN)">
+        <mat-radio-button value="2" [checked]="row.roles[Role.SUPER_ADMIN]"></mat-radio-button>
+      </mat-radio-group>
+    </td>
+  </ng-container>
 
-    <!-- Username Column -->
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef>Username</th>
-      <td mat-cell *matCellDef="let element">{{element.username}}</td>
-    </ng-container>
+  <!-- Staff Admin Role Column -->
+  <ng-container matColumnDef="staffAdmin">
+    <th mat-header-cell *matHeaderCellDef>Staff Admin</th>
+    <td mat-cell *matCellDef="let row">
+      <mat-radio-group (change)="onRoleSelectionChange(row, Role.STAFF_ADMIN)">
+        <mat-radio-button value="3" [checked]="row.roles[Role.STAFF_ADMIN]"></mat-radio-button>
+      </mat-radio-group>
+    </td>
+  </ng-container>
 
-    <!-- User Role Column -->
-    <ng-container matColumnDef="user">
-      <th mat-header-cell *matHeaderCellDef>User</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-radio-group (change)="onRoleSelectionChange(row, 'user')">
-          <mat-radio-button value="1" [checked]="row.roles.user"></mat-radio-button>
-        </mat-radio-group>
-      </td>
-    </ng-container>
+  <!-- Control Admin Role Column -->
+  <ng-container matColumnDef="controlAdmin">
+    <th mat-header-cell *matHeaderCellDef>Control Admin</th>
+    <td mat-cell *matCellDef="let row">
+      <mat-radio-group (change)="onRoleSelectionChange(row, Role.CONTROL_ADMIN)">
+        <mat-radio-button value="4" [checked]="row.roles[Role.CONTROL_ADMIN]"></mat-radio-button>
+      </mat-radio-group>
+    </td>
+  </ng-container>
 
-    <!-- Super Admin Role Column -->
-    <ng-container matColumnDef="super-admin">
-      <th mat-header-cell *matHeaderCellDef>Super Admin</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-radio-group (change)="onRoleSelectionChange(row, 'superAdmin')">
-          <mat-radio-button value="2" [checked]="row.roles.superAdmin"></mat-radio-button>
-        </mat-radio-group>
-      </td>
-    </ng-container>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
 
-    <!-- Staff Admin Role Column -->
-    <ng-container matColumnDef="staff-admin">
-      <th mat-header-cell *matHeaderCellDef>Staff Admin</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-radio-group (change)="onRoleSelectionChange(row, 'staffAdmin')">
-          <mat-radio-button value="3" [checked]="row.roles.staffAdmin"></mat-radio-button>
-        </mat-radio-group>
-      </td>
-    </ng-container>
-
-    <!-- Control Admin Role Column -->
-    <ng-container matColumnDef="control-admin">
-      <th mat-header-cell *matHeaderCellDef>Control Admin</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-radio-group (change)="onRoleSelectionChange(row, 'controlAdmin')">
-          <mat-radio-button value="4" [checked]="row.roles.controlAdmin"></mat-radio-button>
-        </mat-radio-group>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
 </div>
