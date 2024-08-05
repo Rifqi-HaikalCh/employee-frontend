@@ -1,3 +1,16 @@
 @media (max-width: 768px) {
     /* Tambahkan gaya khusus untuk tampilan mobile */
   }
+/* Tailwind CSS classes */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: white; /* Ensure the background color is set to avoid transparency */
+}
+
+/* Additional styling for the header */
+header {
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow to distinguish header */
+}

@@ -36,38 +36,6 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  // fetchUserAccess(): void {
-  //   const userId = this.authService.getUserId();
-
-  //   if (userId) {
-  //     console.log('Retrieved userId:', userId); // Log userId for debugging
-  //     const numericUserId = parseInt(userId.toString(), 10);
-
-  //     if (!isNaN(numericUserId)) {
-  //       console.log('Numeric userId:', numericUserId); // Log numericUserId for debugging
-
-  //       this.authService.fetchUserAccess(numericUserId).subscribe(
-  //         (accessMap) => {
-  //           this.userAccess = accessMap;
-  //           // Convert Map to Object and store it in localStorage
-  //           const accessObj = Array.from(accessMap.entries()).reduce((acc, [key, value]) => {
-  //             acc[key] = value;
-  //             return acc;
-  //           }, {} as { [key: string]: boolean });
-  //           localStorage.setItem('userAccess', JSON.stringify(accessObj));
-  //         },
-  //         (error) => {
-  //           console.error('Failed to fetch user access map', error);
-  //         }
-  //       );
-  //     } else {
-  //       console.error('Invalid numericUserId:', numericUserId);
-  //     }
-  //   } else {
-  //     console.error('User ID is not available');
-  //   }
-  // }
-
   canAccess(page: string): boolean {
     const accessMapStr = localStorage.getItem('userAccess');
     if (!accessMapStr) return false;

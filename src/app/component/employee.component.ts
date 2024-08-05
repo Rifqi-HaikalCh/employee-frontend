@@ -28,7 +28,7 @@ export class EmployeeComponent implements OnInit {
   employeeToDelete: any;
   showDeleteModal = false;
   dataSource: MatTableDataSource<Employee> = new MatTableDataSource();
-  displayedColumns: string[] = ['id', 'firstName', 'lastName', 'emailId', 'dateOfBirth', 'actions'];
+  displayedColumns: string[] = ['no', 'firstName', 'lastName', 'emailId', 'dateOfBirth', 'actions'];
   toastMessage: string = '';
   showToast: boolean = false;
   deleteToastMessage: string = '';
@@ -43,7 +43,7 @@ export class EmployeeComponent implements OnInit {
   @ViewChild('deleteDialogTemplate') deleteDialogTemplate!: TemplateRef<any>;
 
   constructor(
-    public dialog: MatDialog, // Changed from private to public
+    public dialog: MatDialog,
     private employeeService: EmployeeService,
     private authService: AuthService
   ) {}
@@ -52,6 +52,7 @@ export class EmployeeComponent implements OnInit {
     this.loadEmployees();
     this.checkUserAccess();
   }
+
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
@@ -73,12 +74,12 @@ export class EmployeeComponent implements OnInit {
       console.error('User is not logged in');
     }
   }
-  
+
   private loadEmployees() {
     this.employeeService.getAllEmployees().subscribe((employees: any[]) => {
       this.dataSource.data = employees.map(emp => ({
         ...emp,
-        dateOfBirth: new Date(emp.dateOfBirth) // Ensure dateOfBirth is a Date object
+        dateOfBirth: new Date(emp.dateOfBirth)
       }));
     });
   }
@@ -122,7 +123,7 @@ export class EmployeeComponent implements OnInit {
     }
 
     const employeeData = this.selectedEmployeeForm.value;
-    employeeData.dateOfBirth = new Date(employeeData.dateOfBirth); // Convert string to Date
+    employeeData.dateOfBirth = new Date(employeeData.dateOfBirth);
 
     if (this.isNew) {
       this.onSaveNew(employeeData);
@@ -148,7 +149,7 @@ export class EmployeeComponent implements OnInit {
       }
     );
   }
-  
+
   onSaveUpdate(employeeData: Employee): void {
     this.employeeService.updateEmployee(this.selectedEmployee.id, employeeData).subscribe(
       () => {
@@ -173,7 +174,7 @@ export class EmployeeComponent implements OnInit {
       data: { employee: employee }
     });
   }
-  
+
   confirmDelete(dialogRef: MatDialogRef<any>): void {
     if (this.employeeToDelete) {
       this.employeeService.deleteEmployee(this.employeeToDelete.id).subscribe(
@@ -189,7 +190,7 @@ export class EmployeeComponent implements OnInit {
       );
     }
   }
-  
+
   close(dialogRef: MatDialogRef<any>): void {
     dialogRef.close();
   }

@@ -1,25 +1,64 @@
+/* Custom CSS to remove the default radio button appearance */
+.mat-radio-button .mat-radio-container {
+  display: none;
+}
+
+.mat-radio-button .mat-radio-label-content {
+  padding-left: 0; /* Remove padding left */
+  margin-left: 0; /* Remove margin left */
+}
+
+.mat-radio-button {
+  display: flex;
+  align-items: center;
+}
+
+.mat-radio-checked .mat-radio-label-content::before {
+  content: '\2022'; /* Add a custom bullet point or any desired symbol */
+  font-size: 18px; /* Adjust the size as needed */
+  color: #3f51b5; /* Change the color to match your theme */
+  margin-right: 8px; /* Add spacing to the right */
+}
+
 .role-menu-container {
-    padding: 20px;
-  }
-  
-  .role-menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .role-menu-title {
-    font-size: 2em;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #3f51b5;
-  }
-  .role-description {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
-  }
-  .role-description p {
-    margin: 0;
-  }
-  
+  padding: 20px;
+}
+
+.role-description {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+.role-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-menu-title {
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #3f51b5;
+}
+
+.role-description {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+.role-description p {
+  margin: 0;
+}
+
+.example-container {
+  height: 400px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+}
+

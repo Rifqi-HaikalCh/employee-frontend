@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -26,8 +26,25 @@ export class UserService {
   }
 
   updateUserRole(userId: number, roleName: string): Observable<any> {
+    switch (roleName) {
+      case "user":
+          roleName = "USER"
+          break;
+      case "superAdmin":
+          roleName = "SUPER_ADMIN"
+          break;
+      case "staffAdmin":
+          roleName = "STAFF_ADMIN"
+          break;
+      case "controlAdmin":
+        roleName = "CONTROL_ADMIN"
+        break;
+      default:
+        break;
+    }
+    
     return this.http.put<any>(`${this.apiUrl}/users/roles/${userId}`, 
-      { roleName }, // Send as a role update
+      { roleName, id: userId }, // Send as a role update
       { headers: this.getAuthHeaders() }
     );
   }

@@ -1,10 +1,147 @@
 <div class="p-6">
-  <h2 class="text-2xl font-bold mb-4 text-center">Dashboard</h2>
+  <!-- <h2 class="text-2xl font-bold mb-4 text-center">Dashboard</h2> -->
   <app-carousel [slides]="slides"></app-carousel>
 
   <!-- About Section -->
   <div class="mt-8 p-4 bg-white shadow rounded">
-    <h3 class="text-xl font-bold mb-2">Tentang Kami</h3>
+    <h6 class="text-xl font-bold mb-2">Tentang Kami</h6>
     <p>{{ aboutText }}</p>
   </div>
+  <br>
+  <br>
+
+  <!-- Cards Section -->
+  <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <mat-card class="example-card" appearance="outlined">
+      <div class="card-image-container">
+        <img mat-card-image src="images/carousel/card1.jpg" alt="Photo of a Shiba Inu">
+        <div class="card-description">
+          <strong>Acara FIFGROUP Festival</strong></div>
+      </div>
+      <mat-card-content>
+      </mat-card-content>
+      <mat-card-actions class="flex justify-end">
+        <button mat-button style="text-align: right;">Baca Selengkapnya</button>
+
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="example-card" appearance="outlined">
+      <div class="card-image-container">
+        <img mat-card-image src="images/carousel/card2.jpg" alt="Photo of a Shiba Inu">
+        <div class="card-description">
+          <strong>Acara ulang tahun FIFGROUP ke-33</strong></div>
+      </div>
+      <mat-card-content>
+      </mat-card-content>
+      <mat-card-actions class="flex justify-end">
+        <button mat-button style="text-align: right;">Baca Selengkapnya</button>
+
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="example-card" appearance="outlined">
+      <div class="card-image-container">
+        <img mat-card-image src="images/carousel/card3.jpg" alt="Photo of a Shiba Inu">
+        <div class="card-description">
+          <strong>Acara ulang tahun FIFGROUP ke-34</strong></div>
+      </div>
+      <mat-card-content>
+      </mat-card-content>
+      <mat-card-actions class="flex justify-end">
+        <button mat-button style="text-align: right;">Baca Selengkapnya</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+  <br>
+  <br>
+
+  <!-- Contact and Information Section -->
+  <div class="container mt-8 p-4 bg-white shadow rounded">
+    <div class="flex flex-col sm:flex-row">
+      <div class="column">
+        <h6>FIFGROUP</h6>
+        <div class="address">
+          <i class="fas fa-map-marker-alt"></i>
+          <p class="small-text">Menara FIF<br>Jl. T.B. Simatupang Kav.15<br>Cilandak, Jakarta Selatan 12440</p>
+        </div>
+        <div class="email">
+          <i class="fas fa-envelope"></i>
+          <p class="small-text">HALOFIFFIFGROUP.ASTRA.CO.ID</p>
+        </div>
+        <br>
+        <h6>HUBUNGI KAMI</h6>
+        <div class="social-icons">
+          <i class="fab fa-facebook-f"></i>
+          <i class="fab fa-twitter"></i>
+          <i class="fab fa-youtube"></i>
+          <i class="fab fa-instagram"></i>
+        </div>
+        <p class="small-text">Berizin dan diawasi oleh Otoritas Jasa Keuangan</p>
+      </div>
+      <div class="column">
+        <h6>TENTANG KAMI</h6>
+        <ul>
+          <li class="small-text">Profil Perusahaan</li>
+          <li class="small-text">Struktur Organisasi</li>
+          <li class="small-text">Struktur Kepemilikan</li>
+          <li class="small-text">Struktur Group PT Astra International Tbk.</li>
+          <li class="small-text">Profil Direksi</li>
+          <li class="small-text">Profil Dewan Komisaris</li>
+          <li class="small-text">Profil Komite</li>
+          <li class="small-text">Profil Sekretaris Perusahaan</li>
+          <li class="small-text">Dokumen Anggaran Dasar</li>
+        </ul>
+        <br>
+        <h6>PRODUCT SERVICES</h6>
+        <ul>
+          <li class="small-text">FIFASTRA</li>
+          <li class="small-text">SPEKTRA</li>
+          <li class="small-text">DANASTRA</li>
+          <li class="small-text">AMITRA</li>
+          <li class="small-text">FINATRA</li>
+        </ul>
+      </div>
+      <div class="column">
+        <h6>HUBUNGAN INVESTOR</h6>
+        <ul>
+          <li class="small-text">Dokumen Prospektus</li>
+          <li class="small-text">Laporan Tahunan</li>
+          <li class="small-text">Informasi Keuangan</li>
+          <li class="small-text">Informasi Rapat Umum Pemegang Saham</li>
+          <li class="small-text">Informasi Saham</li>
+          <li class="small-text">Informasi Obligasi</li>
+          <li class="small-text">Informasi Deviden</li>
+          <li class="small-text">Informasi Aksi Korporasi</li>
+          <li class="small-text">Informasi Lain</li>
+        </ul>
+        <br>
+        <h6>OTHER LINK</h6>
+        <ul>
+          <li class="small-text">Karir</li>
+          <li class="small-text">Kontak Kami</li>
+          <li class="small-text">Daftar Mitra</li>
+          <li class="small-text">Lokasi Cabang</li>
+          <li class="small-text">Cek Pengajuan</li>
+          <li class="small-text">E-Calendar</li>
+          <li class="small-text">Layanan Pengaduan</li>
+          <li class="small-text">Publikasi Layanan Pengaduan</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
+<br>
+<!-- Footer -->
+<footer class="bg-white p-4 shadow-inner fixed bottom-0 left-0 right-0 z-40">
+  <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+    <div class="text-center sm:text-left mb-2 sm:mb-0">
+      <p class="text-sm text-gray-700" style="font-size: 10px;">© PT Federal International Finance "FIFGROUP" 2024, Berizin dan diawasi oleh Otoritas Jasa Keuangan</p>
+    </div>
+    <div class="text-center sm:text-right">
+      <a href="#" class="text-sm text-blue-600 hover:underline" style="font-size: 10px;">Privacy Policy</a>
+      <span class="mx-2" style="font-size: 10px;">|</span>
+      <a href="#" class="text-sm text-blue-600 hover:underline" style="font-size: 10px;">Terms of Services</a>
+    </div>
+  </div>
+</footer>

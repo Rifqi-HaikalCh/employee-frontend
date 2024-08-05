@@ -15,9 +15,9 @@ export interface UserRoleDto {
   };
 }
 
-export interface RoleFeature {
-  role: string;
-  features: { name: string; enabled: boolean }[];
+export interface Feature {
+  name: string;
+  enabled: boolean;
 }
 
 @Component({
@@ -29,20 +29,30 @@ export class RoleMenuComponent implements OnInit {
   @ViewChild('confirmationDialog', { static: true }) confirmationDialog!: TemplateRef<any>;
   @ViewChild('detailRoleDialog', { static: true }) detailRoleDialog!: TemplateRef<any>;
 
-  displayedColumns: string[] = ['id', 'username', 'user', 'superAdmin', 'staffAdmin', 'controlAdmin'];
+  displayedColumns: string[] = ['no', 'username', 'user', 'superAdmin', 'staffAdmin', 'controlAdmin'];
   dataSource = new MatTableDataSource<UserRoleDto>([]);
 
-  detailRoleDisplayedColumns: string[] = ['feature'];
-  detailRoleDataSource: MatTableDataSource<RoleFeature> = new MatTableDataSource<RoleFeature>([
-    { role: 'Super Admin', features: [{ name: 'employeeList', enabled: true }, { name: 'roleMenuFunction', enabled: true }] },
-    { role: 'Staff Admin', features: [{ name: 'employeeList', enabled: true }, { name: 'roleMenuFunction', enabled: false }] },
-    { role: 'Control Admin', features: [{ name: 'employeeList', enabled: false }, { name: 'roleMenuFunction', enabled: true }] },
-    { role: 'User', features: [{ name: 'employeeList', enabled: false }, { name: 'roleMenuFunction', enabled: false }] }
+  featureDisplayedColumns: string[] = ['feature'];
+
+  superAdminFeatures = new MatTableDataSource<Feature>([
+    { name: 'Employee List', enabled: true },
+    { name: 'Role Menu Function', enabled: true }
   ]);
 
-  featureDisplayedColumns: string[] = ['feature'];
-  featureDataSource = new MatTableDataSource<{ name: string; enabled: boolean }>([]);
-  selectedRole: RoleFeature | null = null;
+  staffAdminFeatures = new MatTableDataSource<Feature>([
+    { name: 'Employee List', enabled: true },
+    { name: 'Role Menu Function', enabled: false }
+  ]);
+
+  controlAdminFeatures = new MatTableDataSource<Feature>([
+    { name: 'Employee List', enabled: false },
+    { name: 'Role Menu Function', enabled: true }
+  ]);
+
+  userFeatures = new MatTableDataSource<Feature>([
+    { name: 'Employee List', enabled: false },
+    { name: 'Role Menu Function', enabled: false }
+  ]);
 
   Role = Role; // Expose the Role enum to the template
 
@@ -69,11 +79,6 @@ export class RoleMenuComponent implements OnInit {
 
   openDetailRoleDialog() {
     this.dialog.open(this.detailRoleDialog);
-  }
-
-  onRoleChange(role: RoleFeature) {
-    this.selectedRole = role;
-    this.featureDataSource.data = role.features;
   }
 
   onRoleSelectionChange(row: UserRoleDto, role: Role) {

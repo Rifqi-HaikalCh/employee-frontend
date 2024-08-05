@@ -1,9 +1,153 @@
-/* Styles specific to the dashboard component */
-.carousel {
-    display: flex;
-    overflow: hidden;
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.column {
+  flex: 1;
+  margin: 10px;
+}
+
+h6 {
+  color: #0066cc;
+  border-bottom: 2px solid #0066cc;
+  padding-bottom: 10px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 5px; /* Adjusted for smaller spacing */
+}
+
+.address, .email {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.address i, .email i {
+  margin-right: 10px;
+  color: #0066cc;
+}
+
+.social-icons {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.social-icons i {
+  margin-right: 15px;
+  color: #666;
+}
+
+.small-text {
+  font-size: 0.8em;
+  color: #666;
+}
+
+footer {
+  background-color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0.00rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+footer p {
+  margin: 0;
+  color: #4a5568; /* gray-700 */
+}
+
+footer a {
+  color: #3182ce; /* blue-600 */
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+footer .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  footer .container {
+    flex-direction: row;
   }
-  .carousel-item {
-    flex: 0 0 100%;
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+
+@media (min-width: 1024px) {
+  .card-container {
+    grid-template-columns: 1fr 1fr 1fr;
   }
-  
+}
+
+.mat-card {
+  width: 100%;
+}
+
+.mat-card-image {
+  width: 100%;
+  height: auto;
+}
+.card-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image-container img {
+  display: block;
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.card-image-container:hover img {
+  transform: scale(1.05);
+}
+
+.card-description {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(155, 4, 4, 0.6); /* Semi-transparent blue */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+  text-align: center;
+}
+
+.card-image-container:hover .card-description {
+  opacity: 1;
+}
+

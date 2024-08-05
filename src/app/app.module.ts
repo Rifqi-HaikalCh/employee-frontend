@@ -42,6 +42,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.Interceptor';
 import { AccessService } from './services/access.service';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatTabsModule} from '@angular/material/tabs';
 
 
 @NgModule({
@@ -60,6 +61,7 @@ import {MatRadioModule} from '@angular/material/radio';
     MatFormFieldModule,
     MatCommonModule,
     HttpClientModule,
+    MatTabsModule,
     MatCheckboxModule,
     MatInputModule,
     MatRadioModule,
