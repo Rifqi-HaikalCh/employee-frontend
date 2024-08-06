@@ -28,8 +28,8 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      this.username = user.username || 'Guest'; // Default to 'Guest' if username is not available
-      // this.fetchUserAccess();
+      this.username = user.username || 'User'; 
+    
     } else {
       console.error('User is not authenticated');
       this.router.navigate(['/login']);

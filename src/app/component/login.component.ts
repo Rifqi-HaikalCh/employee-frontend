@@ -37,10 +37,7 @@ export class LoginComponent implements OnInit {
       this.authService.login(username, password).subscribe({
         next: (response: any) => {
           if (response.authenticated) {
-            // Save token and user details
             this.authService.saveToken(response.jwttoken);
-            // Optionally, save user details in local storage or a service
-            // Navigate to the dashboard or another page
             this.router.navigate(['/dashboard']);
           } else {
             this.errorMessage = 'Invalid username or password';

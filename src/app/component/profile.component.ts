@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 import { UserProfile } from '../models/user-profile.model';
 
 @Component({
@@ -41,20 +41,30 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  openDeleteAccountDialog(): void {
-    this.dialog.open(this.deleteAccountDialog);
-  }
-
-  deleteAccount(): void {
-    this.authService.deleteAccount().subscribe({
-      next: () => {
-        this.authService.logout();
-        this.router.navigate(['/login']);
-      },
-      error: (error: any) => {
-        console.error('Error deleting account', error);
-        this.errorMessage = 'An error occurred while deleting the account. Please try again.';
-      }
-    });
+  getRoleDisplayName(role: string | undefined): string {
+    if (!role) return 'Unknown'; // Handle the case where role might be undefined
+    const roleMap: { [key: string]: string } = {
+      'USER': 'User',
+      'SUPER_ADMIN': 'Super Admin',
+      'STAFF_ADMIN': 'Staff Admin',
+      'CONTROL_ADMIN': 'Control Admin'
+    };
+    return roleMap[role] || role;
   }
 }
+
+
+
+  // deleteAccount(): void {
+  //   this.authService.deleteAccount().subscribe({
+  //     next: () => {
+  //       this.dialog.closeAll();
+  //       this.authService.logout();
+  //       this.router.navigate(['/login']);
+  //     },
+  //     error: (error: any) => {
+  //       console.error('Error deleting account', error);
+  //       this.errorMessage = 'An error occurred while deleting the account. Please try again.';
+  //     }
+  //   });
+  // }

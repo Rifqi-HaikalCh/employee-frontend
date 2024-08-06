@@ -1,5 +1,5 @@
 <div class="p-6">
-  <!-- <h2 class="text-2xl font-bold mb-4 text-center">Dashboard</h2> -->
+  <!-- Carousel Component -->
   <app-carousel [slides]="slides"></app-carousel>
 
   <!-- About Section -->
@@ -12,39 +12,40 @@
 
   <!-- Cards Section -->
   <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <mat-card class="example-card" appearance="outlined">
+    <mat-card class="example-card" appearance="outlined" (click)="navigateToInfoPage('Card1')">
       <div class="card-image-container">
         <img mat-card-image src="images/carousel/card1.jpg" alt="Photo of a Shiba Inu">
         <div class="card-description">
-          <strong>Acara FIFGROUP Festival</strong></div>
+          <strong>Acara FIFGROUP Festival</strong>
+        </div>
       </div>
       <mat-card-content>
       </mat-card-content>
       <mat-card-actions class="flex justify-end">
         <button mat-button style="text-align: right;">Baca Selengkapnya</button>
-
       </mat-card-actions>
     </mat-card>
 
-    <mat-card class="example-card" appearance="outlined">
+    <mat-card class="example-card" appearance="outlined" (click)="navigateToInfoPage('Card2')">
       <div class="card-image-container">
         <img mat-card-image src="images/carousel/card2.jpg" alt="Photo of a Shiba Inu">
         <div class="card-description">
-          <strong>Acara ulang tahun FIFGROUP ke-33</strong></div>
+          <strong>Acara ulang tahun FIFGROUP ke-33</strong>
+        </div>
       </div>
       <mat-card-content>
       </mat-card-content>
       <mat-card-actions class="flex justify-end">
         <button mat-button style="text-align: right;">Baca Selengkapnya</button>
-
       </mat-card-actions>
     </mat-card>
 
-    <mat-card class="example-card" appearance="outlined">
+    <mat-card class="example-card" appearance="outlined" (click)="navigateToInfoPage('Card3')">
       <div class="card-image-container">
         <img mat-card-image src="images/carousel/card3.jpg" alt="Photo of a Shiba Inu">
         <div class="card-description">
-          <strong>Acara ulang tahun FIFGROUP ke-34</strong></div>
+          <strong>Acara ulang tahun FIFGROUP ke-34</strong>
+        </div>
       </div>
       <mat-card-content>
       </mat-card-content>
@@ -62,21 +63,13 @@
       <div class="column">
         <h6>FIFGROUP</h6>
         <div class="address">
-          <i class="fas fa-map-marker-alt"></i>
           <p class="small-text">Menara FIF<br>Jl. T.B. Simatupang Kav.15<br>Cilandak, Jakarta Selatan 12440</p>
         </div>
         <div class="email">
-          <i class="fas fa-envelope"></i>
           <p class="small-text">HALOFIFFIFGROUP.ASTRA.CO.ID</p>
         </div>
         <br>
         <h6>HUBUNGI KAMI</h6>
-        <div class="social-icons">
-          <i class="fab fa-facebook-f"></i>
-          <i class="fab fa-twitter"></i>
-          <i class="fab fa-youtube"></i>
-          <i class="fab fa-instagram"></i>
-        </div>
         <p class="small-text">Berizin dan diawasi oleh Otoritas Jasa Keuangan</p>
       </div>
       <div class="column">
@@ -116,7 +109,7 @@
           <li class="small-text">Informasi Lain</li>
         </ul>
         <br>
-        <h6>OTHER LINK</h6>
+        <h6>OTHER SERVICE</h6>
         <ul>
           <li class="small-text">Karir</li>
           <li class="small-text">Kontak Kami</li>
@@ -139,9 +132,9 @@
       <p class="text-sm text-gray-700" style="font-size: 10px;">© PT Federal International Finance "FIFGROUP" 2024, Berizin dan diawasi oleh Otoritas Jasa Keuangan</p>
     </div>
     <div class="text-center sm:text-right">
-      <a href="#" class="text-sm text-blue-600 hover:underline" style="font-size: 10px;">Privacy Policy</a>
+      <a (click)="navigateToInfoPage('PrivacyPolicy')" class="text-blue-600 hover:underline cursor-pointer">Privacy Policy</a>
       <span class="mx-2" style="font-size: 10px;">|</span>
-      <a href="#" class="text-sm text-blue-600 hover:underline" style="font-size: 10px;">Terms of Services</a>
+      <a (click)="navigateToInfoPage('TermsOfService')" class="text-blue-600 hover:underline cursor-pointer">Terms of Services</a>
     </div>
   </div>
 </footer>

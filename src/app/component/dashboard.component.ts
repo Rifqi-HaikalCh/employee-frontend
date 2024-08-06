@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,7 +14,7 @@ export class DashboardComponent implements OnInit {
   ];
   aboutText: string = "";
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.loadAboutText();
@@ -21,5 +22,9 @@ export class DashboardComponent implements OnInit {
 
   loadAboutText(): void {
     this.aboutText = "FIFGROUP adalah perusahaan pembiayaan konvensional dan syariah bagi konsumen yang ingin membeli berbagai kebutuhan seperti pembiayaan motor Honda melalui FIFASTRA, pembiayaan elektronik dan perabotan rumah tangga melalui SPEKTRA, pinjaman tunai melalui DANASTRA, pembiayaan usaha melalui FINATRA, pembiayaan haji dan umroh serta pembelian emas melalui AMITRA";
+  }
+
+  navigateToInfoPage(page: string): void {
+    this.router.navigate(['/info-page'], { queryParams: { page } });
   }
 }

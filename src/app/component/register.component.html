@@ -4,7 +4,8 @@
     <mat-vertical-stepper [linear]="true" #stepper>
       <mat-step [stepControl]="firstFormGroup">
         <form [formGroup]="firstFormGroup">
-          <ng-template matStepLabel>Fill out your username</ng-template>
+          <ng-template matStepLabel class="custom-step-label">Fill out your username</ng-template>
+          <br>
           <mat-form-field appearance="fill" class="w-full">
             <mat-label>Username</mat-label>
             <input matInput formControlName="username" required>
@@ -17,7 +18,8 @@
 
       <mat-step [stepControl]="secondFormGroup">
         <form [formGroup]="secondFormGroup">
-          <ng-template matStepLabel>Fill out your email</ng-template>
+          <ng-template matStepLabel class="custom-step-label">Fill out your email</ng-template>
+          <br>
           <mat-form-field appearance="fill" class="w-full">
             <mat-label>Email</mat-label>
             <input matInput type="email" formControlName="email" required>
@@ -37,7 +39,8 @@
 
       <mat-step [stepControl]="thirdFormGroup">
         <form [formGroup]="thirdFormGroup">
-          <ng-template matStepLabel>Fill out your password</ng-template>
+          <ng-template matStepLabel class="custom-step-label">Fill out your password</ng-template>
+          <br>
           <mat-form-field appearance="fill" class="w-full">
             <mat-label>Password</mat-label>
             <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" required>

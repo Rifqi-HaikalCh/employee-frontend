@@ -47,7 +47,7 @@ export class RegisterComponent {
 
     this.authService.register(username, email, password, confirmPassword).subscribe(
       response => {
-        if (response) { // Expect response to be a boolean or handle as per the actual response
+        if (response) { 
           this.snackBar.open('Registration successful!', 'Close', {
             duration: 3000,
           });

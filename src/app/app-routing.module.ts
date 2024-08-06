@@ -7,10 +7,12 @@ import { DashboardComponent } from './component/dashboard.component';
 import { EmployeeComponent } from './component/employee.component';
 import { RoleMenuComponent } from './component/role-menu.component';
 import { AuthGuard } from './guards/auth.guard';
+import { InfoPageComponent } from './component/information-page.component';
 
 const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'info-page', component: InfoPageComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { 

@@ -1,46 +1,61 @@
 .min-h-screen {
-    min-height: 100vh;
-  }
-  .flex {
-    display: flex;
-  }
-  .items-center {
-    align-items: center;
-  }
-  .justify-center {
-    justify-content: center;
-  }
-  .bg-gray-100 {
-    background-color: #f7fafc;
-  }
-  .bg-white {
-    background-color: #fff;
-  }
-  .p-8 {
-    padding: 2rem;
-  }
-  .rounded {
-    border-radius: 0.5rem;
-  }
-  .shadow-md {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  .w-full {
-    width: 100%;
-  }
-  .max-w-md {
-    max-width: 28rem;
-  }
-  .mb-4 {
-    margin-bottom: 1rem;
-  }
-  .text-center {
-    text-align: center;
-  }
-  .text-blue-500 {
-    color: #3b82f6;
-  }
-  .hover\:underline:hover {
-    text-decoration: underline;
-  }
+  min-height: 100vh;
+}
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.bg-gray-100 {
+  background-color: #f7fafc;
+}
+.bg-white {
+  background-color: #fff;
+}
+.p-8 {
+  padding: 2rem;
+}
+.rounded {
+  border-radius: 0.5rem;
+}
+.shadow-md {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.w-full {
+  width: 100%;
+}
+.max-w-md {
+  max-width: 28rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.text-center {
+  text-align: center;
+}
+.text-blue-500 {
+  color: #3b82f6;
+}
+.hover\:underline:hover {
+  text-decoration: underline;
+}
+
+.no-hover-effect {
+  color: inherit;
+}
+
+.no-hover-effect:hover {
+  background-color: transparent;
+}
+.custom-step-label {
+  color: inherit;
+}
+
+.custom-step-label:hover {
+  color: inherit;
+}
   

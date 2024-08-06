@@ -10,19 +10,21 @@
     <div class="mt-16 mb-6">
       <div class="flex justify-between items-center mb-2">
         <strong class="text-lg">Username</strong>
-        <span class="font-normal text-lg">{{ userProfile.username }}</span>
+        <span class="font-normal text-lg">{{ userProfile?.username }}</span>
       </div>
       <div class="flex justify-between items-center mb-2">
         <strong class="text-lg">Role</strong>
-        <span class="font-normal text-lg">{{ userProfile.role }}</span>
+        <span class="font-normal text-lg">{{ getRoleDisplayName(userProfile?.role ?? '') }}</span>
       </div>
       <div class="flex justify-between items-center">
         <strong class="text-lg">Email</strong>
-        <span class="font-normal text-lg">{{ userProfile.email }}</span>
+        <span class="font-normal text-lg">{{ userProfile?.email }}</span>
       </div>
     </div>
+    
+    </div>    
     <div class="flex justify-end">
-      <button class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" (click)="openDeleteAccountDialog()">Delete Account</button>
+      <!-- <button class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" (click)="openDeleteAccountDialog()">Delete Account</button> -->
     </div>
   </div>
 
@@ -37,7 +39,7 @@
   </div>
 
   <!-- Dialog for Account Deletion Confirmation -->
-  <ng-template #deleteAccountDialog>
+  <!-- <ng-template #deleteAccountDialog>
     <br>
     <h2 mat-dialog-title class="text-xl font-bold mb-1">Delete Account Confirmation</h2>
     <mat-dialog-content class="mb-6">Are you sure you want to delete this account?</mat-dialog-content>
@@ -49,6 +51,4 @@
         Confirm
       </button>
     </mat-dialog-actions>
-  </ng-template>
-  
-</div>
+  </ng-template> -->
