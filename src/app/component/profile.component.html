@@ -10,15 +10,15 @@
     <div class="mt-16 mb-6">
       <div class="flex justify-between items-center mb-2">
         <strong class="text-lg">Username</strong>
-        <span class="font-normal text-lg">{{ userProfile?.username }}</span>
+        <span class="font-normal text-lg">{{ userProfile.username }}</span>
       </div>
       <div class="flex justify-between items-center mb-2">
         <strong class="text-lg">Role</strong>
-        <span class="font-normal text-lg">{{ getRoleDisplayName(userProfile?.role ?? '') }}</span>
+        <span class="font-normal text-lg">{{ getRoleDisplayName(userProfile.role) }}</span>
       </div>
       <div class="flex justify-between items-center">
         <strong class="text-lg">Email</strong>
-        <span class="font-normal text-lg">{{ userProfile?.email }}</span>
+        <span class="font-normal text-lg">{{ userProfile.email }}</span>
       </div>
     </div>
     
